@@ -1,332 +1,276 @@
-// main.js - Django compatible version (original structure preserved)
+/**
+ * main.js — Multan Electronics
+ *
+ * Responsibilities:
+ *  1. Cart: read/write localStorage, expose addToCart / removeFromCart / clearCart
+ *  2. UI sync: cart count badge, mini-cart dropdown, mobile cart count
+ *  3. "Add to Cart" button delegation (works on all pages)
+ *  4. Place Order: POST cart + billing to /orders/place-order/ and show confirmation
+ *  5. Hero carousel
+ *  6. Category / arrival track sliding
+ */
+
+// ── 1. Cart helpers ──────────────────────────────────────────────────────────
+
+const CART_KEY = "me_cart";
+
+function getCart() {
+  try {
+    return JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveCart(cart) {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  syncCartUI();
+}
+
+function addToCart({ id, name, price, img, qty = 1 }) {
+  const cart  = getCart();
+  const index = cart.findIndex(i => String(i.id) === String(id));
+  if (index >= 0) {
+    cart[index].qty += qty;
+  } else {
+    cart.push({ id: String(id), name, price: parseFloat(price), img, qty });
+  }
+  saveCart(cart);
+  showMiniCart();
+}
+
+function removeFromCart(id) {
+  saveCart(getCart().filter(i => String(i.id) !== String(id)));
+}
+
+function clearCart() {
+  saveCart([]);
+}
+
+// Expose for cart.html inline script
+window.getCart   = getCart;
+window.saveCart  = saveCart;
+window.clearCart = clearCart;
+
+
+// ── 2. UI sync ────────────────────────────────────────────────────────────────
+
+function fmt(n) {
+  return "Rs " + Number(n).toLocaleString("en-PK");
+}
+
+function syncCartUI() {
+  const cart  = getCart();
+  const count = cart.reduce((s, i) => s + i.qty, 0);
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+  // Badge counts
+  document.querySelectorAll(".cart-count, .mobile-cart-count")
+    .forEach(el => { el.textContent = count; });
+
+  // Mini-cart items
+  const miniItems = document.getElementById("miniCartItems");
+  if (miniItems) {
+    if (!cart.length) {
+      miniItems.innerHTML = '<p class="mini-empty">Your cart is empty.</p>';
+    } else {
+      miniItems.innerHTML = cart.map(item => `
+        <div class="mini-cart-item">
+          <img src="${item.img || ''}" alt="${item.name}" />
+          <div class="mini-item-info">
+            <span class="mini-item-name">${item.name}</span>
+            <span class="mini-item-qty">${item.qty} × ${fmt(item.price)}</span>
+          </div>
+          <button class="mini-remove-btn" data-id="${item.id}">✕</button>
+        </div>
+      `).join("");
+
+      miniItems.querySelectorAll(".mini-remove-btn").forEach(btn => {
+        btn.addEventListener("click", e => {
+          e.stopPropagation();
+          removeFromCart(btn.dataset.id);
+        });
+      });
+    }
+  }
+
+  // Mini-cart total
+  const miniTotal = document.getElementById("miniCartTotal");
+  if (miniTotal) miniTotal.textContent = fmt(total);
+}
+
+
+// ── 3. Mini-cart toggle ───────────────────────────────────────────────────────
+
+function showMiniCart() {
+  const mc = document.getElementById("miniCart");
+  if (!mc) return;
+  mc.classList.add("open");
+  setTimeout(() => mc.classList.remove("open"), 3000);
+}
+
+function initMiniCartToggle() {
+  const cartIcon = document.querySelector(".cart-icon");
+  const miniCart = document.getElementById("miniCart");
+  if (!cartIcon || !miniCart) return;
+
+  cartIcon.addEventListener("click", e => {
+    // Don't toggle when clicking the CART link itself
+    if (e.target.tagName === "A") return;
+    miniCart.classList.toggle("open");
+  });
+
+  document.addEventListener("click", e => {
+    if (!cartIcon.contains(e.target)) {
+      miniCart.classList.remove("open");
+    }
+  });
+}
+
+
+// ── 4. Add-to-cart button delegation ─────────────────────────────────────────
+// Works on any page: index, all-products, product-detail
+
+function initAddToCartButtons() {
+  // Static buttons (index.html Django-rendered cards)
+  document.addEventListener("click", e => {
+    const btn = e.target.closest(".add-cart, .add-cart-btn");
+    if (!btn) return;
+    e.preventDefault();
+
+    const { id, name, price, img } = btn.dataset;
+    if (!id) return;
+
+    addToCart({ id, name, price, img });
+
+    // Brief visual feedback
+    const original = btn.textContent;
+    btn.textContent = "✓ Added";
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.disabled = false;
+    }, 1200);
+  });
+
+  // Custom event fired by product-detail.html
+  document.addEventListener("addToCart", e => {
+    addToCart(e.detail);
+  });
+}
+
+
+// ── 5. Place Order (cart.html) ────────────────────────────────────────────────
+// cart.html calls this after the user fills billing details and clicks Place Order.
+
+async function placeOrder(billingData, paymentMethod = "cod") {
+  const cart    = getCart();
+  const total   = cart.reduce((s, i) => s + i.price * i.qty, 0) + 250; // +shipping
+
+  const payload = {
+    items:   cart.map(i => ({ id: i.id, qty: i.qty, price: i.price })),
+    billing:        billingData,
+    payment_method: paymentMethod,
+    total:   total,
+  };
+
+  // Read CSRF token from cookie (Django default)
+  const csrfToken = getCookie("csrftoken");
+
+  try {
+    const res  = await fetch("/orders/place-order/", {
+      method:  "POST",
+      headers: {
+        "Content-Type":  "application/json",
+        "X-CSRFToken":   csrfToken,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.success) {
+      clearCart();
+      return { success: true, orderId: data.order_id };
+    }
+    return { success: false, error: data.error || "Order failed." };
+  } catch (err) {
+    return { success: false, error: "Network error. Please try again." };
+  }
+}
+
+// Expose for cart.html inline script
+window.placeOrder = placeOrder;
+
+
+// ── 6. Hero Carousel ──────────────────────────────────────────────────────────
+
+function initCarousel() {
+  const slides = document.querySelectorAll(".hero-slide");
+  const dots   = document.querySelectorAll(".carousel-dots .dot");
+  if (!slides.length) return;
+
+  let current = 0;
+  let timer;
+
+  function goTo(n) {
+    slides[current].classList.remove("active");
+    dots[current]  && dots[current].classList.remove("active");
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add("active");
+    dots[current]  && dots[current].classList.add("active");
+  }
+
+  function autoPlay() {
+    timer = setInterval(() => goTo(current + 1), 5000);
+  }
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener("click", () => { clearInterval(timer); goTo(i); autoPlay(); });
+  });
+
+  autoPlay();
+}
+
+
+// ── 7. Horizontal slider (categories / arrivals) ──────────────────────────────
+
+function initSliders() {
+  // Categories
+  initSlider(".categories-wrapper", ".categories-track", ".slide-btn.prev", ".slide-btn.next");
+  // New Arrivals
+  initSlider(".arrival-wrapper", ".arrival-track", ".arrival-btn.prev", ".arrival-btn.next");
+}
+
+function initSlider(wrapperSel, trackSel, prevSel, nextSel) {
+  const wrapper = document.querySelector(wrapperSel);
+  if (!wrapper) return;
+  const track = wrapper.querySelector(trackSel);
+  const prev  = wrapper.querySelector(prevSel);
+  const next  = wrapper.querySelector(nextSel);
+  if (!track || !prev || !next) return;
+
+  const step = () => (track.querySelector("div, a")?.offsetWidth || 200) + 16;
+
+  prev.addEventListener("click", () => { track.scrollBy({ left: -step() * 2, behavior: "smooth" }); });
+  next.addEventListener("click", () => { track.scrollBy({ left:  step() * 2, behavior: "smooth" }); });
+}
+
+
+// ── Utility ───────────────────────────────────────────────────────────────────
+
+function getCookie(name) {
+  const val = `; ${document.cookie}`;
+  const parts = val.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+  return "";
+}
+
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", () => {
-
-  /* ================= PRODUCTS DATA ================= */
-
-  // Products now come from Django
-  let products = window.djangoProducts || [];
-
-  /* ================= CART ================= */
-
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-  function updateCartCount() {
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    document.querySelectorAll(".cart-count").forEach((el) => {
-      el.textContent = totalItems;
-    });
-  }
-
-  function addToCart(id, qty) {
-
-    let product;
-
-    if (typeof id === "number") {
-      product = products.find((p) => p.id === id);
-    } else if (typeof id === "string") {
-      product = products.find((p) => p.name === id);
-    }
-
-    if (!product) {
-      console.error("Product not found:", id);
-      return false;
-    }
-
-    const existingItem = cart.find((i) => i.id === product.id);
-
-    if (existingItem) {
-      existingItem.quantity += qty;
-    } else {
-      cart.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        img: product.img,
-        quantity: qty,
-      });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    updateCartCount();
-    renderMiniCart();
-    renderCartPage();
-
-    return true;
-  }
-
-  function removeFromCart(index) {
-
-    cart.splice(index, 1);
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    updateCartCount();
-
-    renderMiniCart();
-    renderCartPage();
-  }
-
-  /* ================= MINI CART ================= */
-
-  function renderMiniCart() {
-
-    const miniCartItems = document.getElementById("miniCartItems");
-    const miniCartTotal = document.getElementById("miniCartTotal");
-
-    if (!miniCartItems) return;
-
-    miniCartItems.innerHTML = "";
-
-    let total = 0;
-
-    if (!cart.length) {
-
-      miniCartItems.innerHTML =
-        "<p style='padding:10px;color:#666;'>Your cart is empty</p>";
-
-      if (miniCartTotal) miniCartTotal.textContent = "Rs 0";
-
-      return;
-    }
-
-    cart.forEach((item, i) => {
-
-      total += item.price * item.quantity;
-
-      miniCartItems.innerHTML += `
-        <div class="mini-cart-item">
-          <img src="${item.img}" alt="${item.name}">
-          <div class="mini-cart-item-info">
-            <h5>${item.name}</h5>
-            <span>${item.quantity} × Rs ${item.price}</span>
-          </div>
-          <button class="mini-remove" data-index="${i}">&times;</button>
-        </div>
-      `;
-    });
-
-    if (miniCartTotal) miniCartTotal.textContent = `Rs ${total}`;
-
-    document.querySelectorAll(".mini-remove").forEach((btn) => {
-
-      btn.addEventListener("click", function (e) {
-
-        e.stopPropagation();
-
-        const index = parseInt(this.dataset.index);
-
-        removeFromCart(index);
-
-      });
-
-    });
-
-  }
-
-  /* ================= CART PAGE ================= */
-
-  function renderCartPage() {
-
-    const cartItemsContainer = document.getElementById("cart-items");
-
-    if (!cartItemsContainer) return;
-
-    cartItemsContainer.innerHTML = "";
-
-    let subtotal = 0;
-
-    cart.forEach((item, idx) => {
-
-      subtotal += item.price * item.quantity;
-
-      const tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>
-          <div class="cart-product">
-            <img src="${item.img}">
-            <span>${item.name}</span>
-          </div>
-        </td>
-        <td>Rs ${item.price}</td>
-        <td>
-          <div class="qty-wrapper">
-            <button class="qty-btn minus" data-index="${idx}">-</button>
-            <span class="qty-value">${item.quantity}</span>
-            <button class="qty-btn plus" data-index="${idx}">+</button>
-          </div>
-        </td>
-        <td>Rs ${item.price * item.quantity}</td>
-        <td>
-          <button class="remove-item" data-index="${idx}">&times;</button>
-        </td>
-      `;
-
-      cartItemsContainer.appendChild(tr);
-
-    });
-
-  }
-
-  /* ================= PRODUCT CARD ================= */
-
-  function initHomepageProducts() {
-
-    document.querySelectorAll(".add-cart").forEach((button) => {
-
-      button.addEventListener("click", function (e) {
-
-        e.stopPropagation();
-        e.preventDefault();
-
-        const card = this.closest(".product-card");
-
-        const productName = card.querySelector("h3").textContent;
-
-        const product = products.find((p) => p.name === productName);
-
-        if (product) {
-
-          addToCart(product.id, 1);
-
-        }
-
-      });
-
-    });
-
-    document.querySelectorAll(".product-card").forEach((card) => {
-
-      card.addEventListener("click", function (e) {
-
-        if (
-          e.target.closest(".add-cart") ||
-          e.target.closest(".wishlist-btn")
-        ) return;
-
-        const productName = this.querySelector("h3").textContent;
-
-        const product = products.find((p) => p.name === productName);
-
-        if (product) {
-
-          // Django product detail page
-          window.location.href = `/products/product/${product.id}/`;
-
-        }
-
-      });
-
-    });
-
-  }
-
-  /* ================= PRODUCT DETAIL ================= */
-
-  function initProductDetailPage() {
-
-    const mainImg = document.getElementById("mainImage");
-
-    if (!mainImg) return;
-
-    const productId = window.productId || null;
-
-    if (!productId) return;
-
-    const product = products.find((p) => p.id == productId);
-
-    if (!product) return;
-
-    document.getElementById("productTitle").textContent = product.name;
-
-    document.getElementById("currentPrice").textContent =
-      `Rs ${product.price}`;
-
-    mainImg.src = product.img;
-
-    const addToCartBtn = document.getElementById("addToCartBtn");
-
-    if (addToCartBtn) {
-
-      addToCartBtn.onclick = () => {
-
-        addToCart(product.id, 1);
-
-      };
-
-    }
-
-  }
-
-  /* ================= AUTH MODAL ================= */
-
-  function initAuthModal() {
-
-    const authModal = document.getElementById("authModal");
-
-    if (!authModal) return;
-
-    document.querySelectorAll('.account a[href="#"]').forEach((btn) => {
-
-      btn.onclick = (e) => {
-
-        e.preventDefault();
-
-        authModal.classList.add("active");
-
-        document.body.style.overflow = "hidden";
-
-      };
-
-    });
-
-  }
-
-  /* ================= BACK TO TOP ================= */
-
-  function initBackToTop() {
-
-    const backToTop = document.getElementById("backToTop");
-
-    if (!backToTop) return;
-
-    window.onscroll = () => {
-
-      backToTop.style.display =
-        window.scrollY > 300 ? "flex" : "none";
-
-    };
-
-    backToTop.onclick = () => {
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
-
-    };
-
-  }
-
-  /* ================= INITIALIZE ================= */
-
-  function init() {
-
-    updateCartCount();
-
-    renderMiniCart();
-
-    renderCartPage();
-
-    initHomepageProducts();
-
-    initProductDetailPage();
-
-    initAuthModal();
-
-    initBackToTop();
-
-  }
-
-  init();
-
+  syncCartUI();
+  initMiniCartToggle();
+  initAddToCartButtons();
+  initCarousel();
+  initSliders();
 });

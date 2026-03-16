@@ -1,492 +1,168 @@
-<!doctype html>
+{% extends "base.html" %}
 {% load static %}
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
 
-    <title>Product Details</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
-  </head>
-  <body>
-    <!-- TOP BAR -->
-    <div class="top-bar">
-      <div class="container">
-        <span>
-          SHOP TIMING 10:00AM TO 8:00 PM (FRIDAY OFF) CONTACT US +92-300123456
-        </span>
-        <div class="top-links">
-          <a href="#">Promo Code</a>
-          <a href="#">My Account</a>
-          <a href="#">Track Your Order</a>
-          <a href="#">About Us</a>
-          <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
-          <a href="#"><ion-icon name="mail-outline"></ion-icon></a>
-        </div>
+{% block title %}{{ product.name }} – Multan Electronics{% endblock %}
+
+{% block extra_head %}
+  <script>
+    const PRODUCT_DATA = {{ product_json|safe }};
+  </script>
+{% endblock %}
+
+{% block content %}
+
+  <!-- ===== PRODUCT DETAIL ===== -->
+  <div class="product-detail-page container">
+
+    <!-- LEFT: IMAGE GALLERY -->
+    <div class="product-gallery">
+      <div class="gallery-thumbs" id="galleryThumbs"></div>
+      <div class="gallery-main">
+        <img src="{{ product.image.url|default:'' }}" id="mainImage" alt="{{ product.name }}" />
       </div>
     </div>
 
-    <!-- STICKY HEADER -->
-    <div class="sticky-header">
-      <header class="main-header">
-        <div class="container header-content">
-          <!-- Mobile Hamburger Button -->
-          <button class="mobile-nav-toggle">
-            <i class="fas fa-bars"></i>
-          </button>
+    <!-- RIGHT: PRODUCT INFO -->
+    <div class="product-info">
+      <p class="breadcrumb" id="breadcrumb">
+        <a href="{% url 'home' %}">HOME</a> /
+        {% for cat in product.categories.all %}
+          <a href="{% url 'all_products' %}?category={{ cat.slug }}">{{ cat.name|upper }}</a>{% if not forloop.last %} / {% endif %}
+        {% endfor %}
+      </p>
 
-          <div class="logo">
-            <a href="{% url 'home' %}"
-              ><img src="{% static 'img/logo.png' %}" alt="Multan Electronics"
-            /></a>
-          </div>
+      <h1 id="productTitle">{{ product.name }}</h1>
 
-          <div class="search-box">
-            <input type="text" placeholder="Search..." />
-            <button>🔍</button>
-          </div>
-
-          <div class="account cart-wrapper">
-            <a href="#" class="desktop-login">LOGIN</a>
-            <div class="vr"></div>
-
-            <div class="cart-icon">
-              <a href="{% url 'cart' %}">CART</a>
-              <span class="cart-count">0</span>
-
-              <!-- MINI CART -->
-              <div class="mini-cart" id="miniCart">
-                <h4>Shopping Cart</h4>
-
-                <div class="mini-cart-items" id="miniCartItems"></div>
-
-                <div class="mini-cart-footer">
-                  <div class="mini-total">
-                    <span>Total:</span>
-                    <strong id="miniCartTotal">Rs 0</strong>
-                  </div>
-
-                  <div class="cnt">
-                    <a href="{% url 'cart' %}"
-                      ><button class="view-cart-btn">View Cart</button></a
-                    >
-                    <a href="{% url 'checkout' %}"
-                      ><button class="check-out-btn">Checkout</button></a
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <nav class="nav-bar">
-        <ul class="nav-menu">
-          <li><a href="{% url 'all_products' %}">ALL PRODUCTS</a></li>
-
-          <li class="has-dropdown">
-            <a href="#">3D PRINTERS ▾</a>
-            <div class="dropdown">
-              <a href="#">Ender 3</a>
-              <a href="#">Prusa i3</a>
-              <a href="#">Anycubic</a>
-              <a href="#">Resin Printers</a>
-            </div>
-          </li>
-
-          <li class="has-dropdown">
-            <a href="#">MICROCONTROLLERS & BOARDS ▾</a>
-            <div class="dropdown">
-              <a href="#">Arduino</a>
-              <a href="#">ESP32</a>
-              <a href="#">ESP8266</a>
-              <a href="#">Raspberry Pi</a>
-            </div>
-          </li>
-
-          <li><a href="#">CNC & 3D PRINTER PARTS</a></li>
-          <li><a href="#">INCUBATORS PARTS</a></li>
-          <li><a href="#">LASER MODULES</a></li>
-          <li><a href="#">QUADCOPTER & PARTS</a></li>
-          <li><a href="#">DIY PROJECTS</a></li>
-        </ul>
-      </nav>
-    </div>
-
-    <!-- Mobile Navigation Overlay -->
-    <div class="mobile-nav-overlay"></div>
-
-    <!-- Mobile Navigation Menu -->
-    <div class="mobile-nav-container">
-      <div class="mobile-nav-header">
-        <h3>Menu</h3>
-        <button class="mobile-close-btn">&times;</button>
+      <div class="price">
+        <span id="currentPrice">Rs {{ product.price|floatformat:"0" }}</span>
       </div>
 
-      <div class="mobile-nav-content">
-        <!-- Mobile Search -->
-        <div class="mobile-search-box">
-          <input type="text" placeholder="Search products..." />
-          <button>
-            <i class="fas fa-search"></i>
-          </button>
+      <ul class="product-notes" id="productNotes">
+        {# JS also populates this, but server-side is the source of truth #}
+      </ul>
+
+      <div class="product-actions">
+        <div class="qty-wrapper">
+          <button class="qty-btn minus">-</button>
+          <span class="qty-value">1</span>
+          <button class="qty-btn plus">+</button>
         </div>
+        <button class="add-cart-btn" id="addToCartBtn"
+                data-id="{{ product.id }}"
+                data-name="{{ product.name }}"
+                data-price="{{ product.price }}"
+                data-img="{% if product.image %}{{ product.image.url }}{% endif %}">
+          ADD TO CART
+        </button>
+        <button class="buy-now-btn" id="buyNowBtn">BUY NOW</button>
+      </div>
 
-        <!-- Mobile Navigation Links -->
-        <ul class="mobile-nav-menu">
-          <li class="mobile-nav-item">
-            <a href="{% url 'all_products' %}" class="mobile-nav-link">ALL PRODUCTS</a>
-          </li>
+      <p class="categories" id="productCategories">
+        <strong>Categories:</strong>
+        {% for cat in product.categories.all %}
+          <a href="{% url 'all_products' %}?category={{ cat.slug }}">{{ cat.name }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+    </div>
+  </div>
 
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">3D PRINTERS</a>
-            <button class="mobile-dropdown-toggle">›</button>
-            <div class="mobile-dropdown">
-              <div class="mobile-dropdown-item"><a href="#">Ender 3</a></div>
-              <div class="mobile-dropdown-item"><a href="#">Prusa i3</a></div>
-              <div class="mobile-dropdown-item"><a href="#">Anycubic</a></div>
-              <div class="mobile-dropdown-item">
-                <a href="#">Resin Printers</a>
-              </div>
-            </div>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">MICROCONTROLLERS & BOARDS</a>
-            <button class="mobile-dropdown-toggle">›</button>
-            <div class="mobile-dropdown">
-              <div class="mobile-dropdown-item"><a href="#">Arduino</a></div>
-              <div class="mobile-dropdown-item"><a href="#">ESP32</a></div>
-              <div class="mobile-dropdown-item"><a href="#">ESP8266</a></div>
-              <div class="mobile-dropdown-item">
-                <a href="#">Raspberry Pi</a>
-              </div>
-            </div>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">CNC & 3D PRINTER PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">INCUBATORS PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">LASER MODULES</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">QUADCOPTER & PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">DIY PROJECTS</a>
-          </li>
-        </ul>
-
-        <!-- Mobile Account Links -->
-        <div class="mobile-account-section">
-          <h4>Account</h4>
-          <div class="mobile-account-links">
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-user"></i> LOGIN
-            </a>
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-heart"></i> Wishlist
-            </a>
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-history"></i> Order History
-            </a>
-          </div>
-        </div>
-
-        <!-- Mobile Cart -->
-        <div class="mobile-cart-section">
-          <a href="{% url 'cart' %}" class="mobile-cart-link">
-            <div class="mobile-cart-info">
-              <i class="fas fa-shopping-cart"></i>
-              <span>View Cart</span>
-            </div>
-            <div class="mobile-cart-count">0</div>
-          </a>
-        </div>
+  <!-- ===== TABS: DESCRIPTION / REVIEWS ===== -->
+  <div class="product-tabs container">
+    <div class="tabs-header">
+      <button class="active" id="descTabBtn">DESCRIPTION</button>
+      <button id="reviewTabBtn">REVIEWS (0)</button>
+    </div>
+    <div class="tab-content" id="tabContent">
+      <div id="descPanel">
+        {{ product.description|linebreaks }}
+      </div>
+      <div id="reviewPanel" style="display:none;">
+        <p>No reviews yet. Be the first to review this product.</p>
       </div>
     </div>
+  </div>
 
-    <!-- PRODUCT DETAIL PAGE -->
-    <div class="product-detail-page container">
-      <!-- LEFT: IMAGE GALLERY -->
-      <div class="product-gallery">
-        <div class="gallery-thumbs" id="galleryThumbs">
-          <!-- JS will populate thumbnails -->
-        </div>
+{% endblock %}
 
-        <div class="gallery-main">
-          <img src="" id="mainImage" alt="Product Image" />
-        </div>
-      </div>
+{% block extra_scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const p = PRODUCT_DATA;
 
-      <!-- RIGHT: PRODUCT INFO -->
-      <div class="product-info">
-        <p class="breadcrumb" id="breadcrumb">HOME / CATEGORY</p>
-        <h1 id="productTitle"></h1>
+    // ── Gallery thumbnails ──────────────────────────────────────────
+    const thumbsContainer = document.getElementById("galleryThumbs");
+    const mainImg = document.getElementById("mainImage");
+    const allImages = p.gallery && p.gallery.length ? p.gallery : (p.img ? [p.img] : []);
 
-        <div class="price">
-          <del id="oldPrice"></del>
-          <span id="currentPrice"></span>
-        </div>
-
-        <ul class="product-notes" id="productNotes">
-          <!-- JS can populate notes -->
-        </ul>
-
-        <div class="product-actions">
-          <div class="qty-wrapper">
-            <button class="qty-btn minus">-</button>
-            <span class="qty-value">1</span>
-            <button class="qty-btn plus">+</button>
-          </div>
-
-          <button class="add-cart-btn" id="addToCartBtn">ADD TO CART</button>
-          <button class="buy-now-btn" id="buyNowBtn">BUY NOW</button>
-        </div>
-
-        <p class="categories" id="productCategories">
-          <!-- Categories: -->
-          <!-- JS will populate -->
-        </p>
-      </div>
-    </div>
-
-    <!-- TABS -->
-    <div class="product-tabs container">
-      <div class="tabs-header">
-        <button class="active" id="descTabBtn">DESCRIPTION</button>
-        <button id="reviewTabBtn">REVIEWS (0)</button>
-      </div>
-
-      <div class="tab-content" id="tabContent">
-        <!-- JS will populate description or reviews -->
-      </div>
-    </div>
-
-    <footer class="site-footer">
-      <div class="footer-container">
-        <h2 class="footer-title">Get in touch</h2>
-        <p class="footer-subtitle">CONTACT US</p>
-
-        <div class="footer-content">
-          <div class="footer-col">
-            <p>
-              City Mall Near Zavia School System,<br />
-              Gulgasht Colony, Multan
-            </p>
-          </div>
-
-          <div class="footer-col">
-            <p>info@multanelectronics.com</p>
-            <p>+92-300123456</p>
-          </div>
-
-          <div class="footer-col">
-            <a href="#">Shop</a>
-            <a href="#">DIY Projects</a>
-          </div>
-
-          <div class="footer-col">
-            <a href="#">About</a>
-            <a href="#">Track your Orders</a>
-          </div>
-        </div>
-
-        <div class="footer-social">
-          <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-linkedin"></ion-icon></a>
-        </div>
-      </div>
-    </footer>
-
-    <div class="footer-bottom-bar">
-      <div class="payment-methods">
-        <i class="fa fa-cc-visa"></i>
-        <i class="fa fa-cc-paypal"></i>
-        <i class="fa fa-cc-mastercard"></i>
-        <i class="fa fa-cc-stripe"></i>
-      </div>
-
-      <div class="f-links">
-        <a href="#">Promo Code</a>
-        <a href="#">My Account</a>
-        <a href="#">Track Your Order</a>
-        <a href="#">About Us</a>
-      </div>
-
-      <div class="footer-copyright">
-        © 2026 Multan Electronics. All Rights Reserved.
-      </div>
-    </div>
-
-    <!-- LOGIN / REGISTER MODAL -->
-    <div class="auth-modal" id="authModal">
-      <div class="auth-overlay"></div>
-
-      <div class="auth-box">
-        <button class="auth-close" id="closeAuth">&times;</button>
-
-        <div class="auth-content">
-          <!-- LOGIN -->
-          <div class="auth-column">
-            <h2>LOGIN</h2>
-
-            <label>Username or email address</label>
-            <input type="text" />
-
-            <label>Password</label>
-            <input type="password" />
-
-            <button class="auth-btn">LOG IN</button>
-            <a href="#" class="lost">Lost your password?</a>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- REGISTER -->
-          <div class="auth-column">
-            <h2>REGISTER</h2>
-
-            <label>Email address</label>
-            <input type="email" />
-
-            <label>Password</label>
-            <input type="password" />
-
-            <p class="privacy">
-              Your personal data will be used to support your experience
-              throughout this website, to manage access to your account, and for
-              other purposes described in our
-              <a href="#">privacy policy</a>.
-            </p>
-
-            <button class="auth-btn">REGISTER</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <ion-icon name="arrow-up-circle-outline" id="backToTop"></ion-icon>
-    <ion-icon name="logo-whatsapp" class="wp" title="Need Help?"></ion-icon>
-
-    <!-- <script src="script.js"></script> -->
-    <script type="module" src="{% static 'js/main.js' %}"></script>
-
-    <script>
-      // Mobile Navigation Toggle
-      document.addEventListener("DOMContentLoaded", function () {
-        const mobileToggle = document.querySelector(".mobile-nav-toggle");
-        const mobileClose = document.querySelector(".mobile-close-btn");
-        const mobileNav = document.querySelector(".mobile-nav-container");
-        const mobileOverlay = document.querySelector(".mobile-nav-overlay");
-        const dropdownToggles = document.querySelectorAll(
-          ".mobile-dropdown-toggle",
-        );
-
-        // Toggle mobile menu
-        function toggleMobileMenu() {
-          mobileNav.classList.toggle("active");
-          mobileOverlay.classList.toggle("active");
-          document.body.style.overflow = mobileNav.classList.contains("active")
-            ? "hidden"
-            : "";
-        }
-
-        // Open mobile menu
-        if (mobileToggle) {
-          mobileToggle.addEventListener("click", toggleMobileMenu);
-        }
-
-        // Close mobile menu
-        if (mobileClose) {
-          mobileClose.addEventListener("click", toggleMobileMenu);
-        }
-
-        // Close menu when clicking overlay
-        if (mobileOverlay) {
-          mobileOverlay.addEventListener("click", toggleMobileMenu);
-        }
-
-        // Handle dropdown toggles
-        dropdownToggles.forEach((toggle) => {
-          toggle.addEventListener("click", function () {
-            const dropdown = this.nextElementSibling;
-            dropdown.classList.toggle("active");
-
-            // Rotate arrow
-            if (dropdown.classList.contains("active")) {
-              this.style.transform = "rotate(90deg)";
-            } else {
-              this.style.transform = "rotate(0deg)";
-            }
-          });
-        });
-
-        // Close menu when clicking a link (except dropdown toggles)
-        const mobileLinks = document.querySelectorAll(
-          ".mobile-nav-link, .mobile-account-link, .mobile-cart-link",
-        );
-        mobileLinks.forEach((link) => {
-          link.addEventListener("click", function (e) {
-            if (!this.classList.contains("mobile-dropdown-toggle")) {
-              toggleMobileMenu();
-            }
-          });
-        });
-
-        // Handle mobile search
-        const mobileSearchBtn = document.querySelector(
-          ".mobile-search-box button",
-        );
-        if (mobileSearchBtn) {
-          mobileSearchBtn.addEventListener("click", function () {
-            const searchInput = this.previousElementSibling;
-            if (searchInput.value.trim()) {
-              // Perform search
-              console.log("Searching for:", searchInput.value);
-              toggleMobileMenu();
-            }
-          });
-
-          // Allow Enter key in search
-          const searchInput = mobileSearchBtn.previousElementSibling;
-          searchInput.addEventListener("keypress", function (e) {
-            if (e.key === "Enter") {
-              mobileSearchBtn.click();
-            }
-          });
-        }
+    allImages.forEach((src, i) => {
+      const thumb = document.createElement("img");
+      thumb.src = src;
+      thumb.alt = "Thumbnail " + (i + 1);
+      thumb.className = i === 0 ? "active-thumb" : "";
+      thumb.addEventListener("click", () => {
+        mainImg.src = src;
+        thumbsContainer.querySelectorAll("img").forEach(t => t.classList.remove("active-thumb"));
+        thumb.classList.add("active-thumb");
       });
-    </script>
+      thumbsContainer.appendChild(thumb);
+    });
+    if (allImages[0]) mainImg.src = allImages[0];
 
-    <script
-      type="module"
-      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
-    ></script>
-    <script
-      nomodule
-      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
-    ></script>
-  </body>
-</html>
+    // ── Product notes ───────────────────────────────────────────────
+    const notesList = document.getElementById("productNotes");
+    if (p.notes && p.notes.length) {
+      notesList.innerHTML = p.notes.map(n => `<li>${n.trim()}</li>`).join("");
+    }
+
+    // ── Quantity controls ───────────────────────────────────────────
+    const qtyDisplay = document.querySelector(".qty-value");
+    let qty = 1;
+    document.querySelector(".qty-btn.minus").addEventListener("click", () => {
+      if (qty > 1) { qty--; qtyDisplay.textContent = qty; }
+    });
+    document.querySelector(".qty-btn.plus").addEventListener("click", () => {
+      qty++;
+      qtyDisplay.textContent = qty;
+    });
+
+    // ── Add to Cart ─────────────────────────────────────────────────
+    const addToCartBtn = document.getElementById("addToCartBtn");
+    addToCartBtn && addToCartBtn.addEventListener("click", function () {
+      const cartItem = {
+        id:    this.dataset.id,
+        name:  this.dataset.name,
+        price: parseFloat(this.dataset.price),
+        img:   this.dataset.img,
+        qty:   qty,
+      };
+      // Dispatch a custom event that main.js cart module listens to
+      document.dispatchEvent(new CustomEvent("addToCart", { detail: cartItem }));
+    });
+
+    // ── Buy Now ─────────────────────────────────────────────────────
+    document.getElementById("buyNowBtn").addEventListener("click", function () {
+      addToCartBtn.click();
+      window.location.href = "{% url 'checkout' %}";
+    });
+
+    // ── Description / Reviews tabs ──────────────────────────────────
+    const descBtn    = document.getElementById("descTabBtn");
+    const reviewBtn  = document.getElementById("reviewTabBtn");
+    const descPanel  = document.getElementById("descPanel");
+    const reviewPanel = document.getElementById("reviewPanel");
+
+    descBtn.addEventListener("click", () => {
+      descBtn.classList.add("active");
+      reviewBtn.classList.remove("active");
+      descPanel.style.display  = "";
+      reviewPanel.style.display = "none";
+    });
+    reviewBtn.addEventListener("click", () => {
+      reviewBtn.classList.add("active");
+      descBtn.classList.remove("active");
+      reviewPanel.style.display = "";
+      descPanel.style.display  = "none";
+    });
+  });
+</script>
+{% endblock %}

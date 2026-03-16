@@ -1,899 +1,389 @@
-<!doctype html>
+{% extends "base.html" %}
 {% load static %}
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
 
-    <title>Your Cart - Multan Electronics</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
-  </head>
-  <body>
-    <div class="top-bar">
-      <div class="container">
-        <span
-          >SHOP TIMING 10:00AM TO 8:00 PM (FRIDAY OFF) CONTACT US
-          +92-300123456</span
-        >
-        <div class="top-links">
-          <a href="#">Promo Code</a>
-          <a href="#">My Account</a>
-          <a href="#">Track Your Order</a>
-          <a href="#">About Us</a>
-          <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
-          <a href="#"><ion-icon name="mail-outline"></ion-icon></a>
+{% block title %}Your Cart – Multan Electronics{% endblock %}
+
+{% block content %}
+
+  <!-- ===== CART & CHECKOUT PAGE ===== -->
+  <div class="cart-checkout-container container">
+
+    <!-- Checkout Steps Progress Bar -->
+    <div class="checkout-progress" id="checkoutProgress" style="display:none;">
+      <div class="progress-steps">
+        <div class="step active" data-step="1">
+          <span class="step-number">1</span>
+          <span class="step-label">Cart</span>
+        </div>
+        <div class="step" data-step="2">
+          <span class="step-number">2</span>
+          <span class="step-label">Details</span>
+        </div>
+        <div class="step" data-step="3">
+          <span class="step-number">3</span>
+          <span class="step-label">Payment</span>
         </div>
       </div>
     </div>
 
-    <div class="sticky-header">
-      <header class="main-header">
-        <div class="container header-content">
-          <!-- Mobile Hamburger Button -->
-          <button class="mobile-nav-toggle">
-            <i class="fas fa-bars"></i>
-          </button>
+    <!-- ── STEP 1: CART VIEW ── -->
+    <div class="cart-view" id="cartView">
+      <h2 class="cart-heading">Shopping Cart</h2>
 
-          <div class="logo">
-            <a href="{% url 'home' %}"
-              ><img src="{% static 'img/logo.png' %}" alt="Multan Electronics"
-            /></a>
-          </div>
+      <div class="cart-layout">
+        <!-- Cart Items -->
+        <div class="cart-items-section">
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cartTableBody">
+              <!-- JS renders rows from localStorage cart -->
+            </tbody>
+          </table>
 
-          <div class="search-box">
-            <input type="text" placeholder="Search..." />
-            <button>🔍</button>
-          </div>
-
-          <div class="account cart-wrapper">
-            <a href="#" class="desktop-login">LOGIN</a>
-            <div class="vr"></div>
-
-            <div class="cart-icon">
-              <a href="{% url 'cart' %}">CART</a>
-              <span class="cart-count">0</span>
-
-              <!-- MINI CART -->
-              <div class="mini-cart" id="miniCart">
-                <h4>Shopping Cart</h4>
-
-                <div class="mini-cart-items" id="miniCartItems"></div>
-
-                <div class="mini-cart-footer">
-                  <div class="mini-total">
-                    <span>Total:</span>
-                    <strong id="miniCartTotal">Rs 0</strong>
-                  </div>
-
-                  <div class="cnt">
-                    <a href="{% url 'cart' %}"
-                      ><button class="view-cart-btn">View Cart</button></a
-                    >
-                    <a href="{% url 'checkout' %}"
-                      ><button class="check-out-btn">Checkout</button></a
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <nav class="nav-bar">
-        <ul class="nav-menu">
-          <li><a href="{% url 'all_products' %}">ALL PRODUCTS</a></li>
-
-          <li class="has-dropdown">
-            <a href="#">3D PRINTERS ▾</a>
-            <div class="dropdown">
-              <a href="#">Ender 3</a>
-              <a href="#">Prusa i3</a>
-              <a href="#">Anycubic</a>
-              <a href="#">Resin Printers</a>
-            </div>
-          </li>
-
-          <li class="has-dropdown">
-            <a href="#">MICROCONTROLLERS & BOARDS ▾</a>
-            <div class="dropdown">
-              <a href="#">Arduino</a>
-              <a href="#">ESP32</a>
-              <a href="#">ESP8266</a>
-              <a href="#">Raspberry Pi</a>
-            </div>
-          </li>
-
-          <li><a href="#">CNC & 3D PRINTER PARTS</a></li>
-          <li><a href="#">INCUBATORS PARTS</a></li>
-          <li><a href="#">LASER MODULES</a></li>
-          <li><a href="#">QUADCOPTER & PARTS</a></li>
-          <li><a href="#">DIY PROJECTS</a></li>
-        </ul>
-      </nav>
-    </div>
-
-    <!-- Mobile Navigation Overlay -->
-    <div class="mobile-nav-overlay"></div>
-
-    <!-- Mobile Navigation Menu -->
-    <div class="mobile-nav-container">
-      <div class="mobile-nav-header">
-        <h3>Menu</h3>
-        <button class="mobile-close-btn">&times;</button>
-      </div>
-
-      <div class="mobile-nav-content">
-        <!-- Mobile Search -->
-        <div class="mobile-search-box">
-          <input type="text" placeholder="Search products..." />
-          <button>
-            <i class="fas fa-search"></i>
-          </button>
-        </div>
-
-        <!-- Mobile Navigation Links -->
-        <ul class="mobile-nav-menu">
-          <li class="mobile-nav-item">
-            <a href="{% url 'all_products' %}" class="mobile-nav-link">ALL PRODUCTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">3D PRINTERS</a>
-            <button class="mobile-dropdown-toggle">›</button>
-            <div class="mobile-dropdown">
-              <div class="mobile-dropdown-item"><a href="#">Ender 3</a></div>
-              <div class="mobile-dropdown-item"><a href="#">Prusa i3</a></div>
-              <div class="mobile-dropdown-item"><a href="#">Anycubic</a></div>
-              <div class="mobile-dropdown-item">
-                <a href="#">Resin Printers</a>
-              </div>
-            </div>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">MICROCONTROLLERS & BOARDS</a>
-            <button class="mobile-dropdown-toggle">›</button>
-            <div class="mobile-dropdown">
-              <div class="mobile-dropdown-item"><a href="#">Arduino</a></div>
-              <div class="mobile-dropdown-item"><a href="#">ESP32</a></div>
-              <div class="mobile-dropdown-item"><a href="#">ESP8266</a></div>
-              <div class="mobile-dropdown-item">
-                <a href="#">Raspberry Pi</a>
-              </div>
-            </div>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">CNC & 3D PRINTER PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">INCUBATORS PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">LASER MODULES</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">QUADCOPTER & PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">DIY PROJECTS</a>
-          </li>
-        </ul>
-
-        <!-- Mobile Account Links -->
-        <div class="mobile-account-section">
-          <h4>Account</h4>
-          <div class="mobile-account-links">
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-user"></i> LOGIN
-            </a>
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-heart"></i> Wishlist
-            </a>
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-history"></i> Order History
-            </a>
-          </div>
-        </div>
-
-        <!-- Mobile Cart -->
-        <div class="mobile-cart-section">
-          <a href="{% url 'cart' %}" class="mobile-cart-link">
-            <div class="mobile-cart-info">
-              <i class="fas fa-shopping-cart"></i>
-              <span>View Cart</span>
-            </div>
-            <div class="mobile-cart-count">0</div>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- ================= CART & CHECKOUT PAGE ================= -->
-    <div class="cart-checkout-container container">
-      <!-- Checkout Steps Progress Bar (Hidden by default) -->
-      <div class="checkout-progress" style="display: none">
-        <div class="progress-steps">
-          <div class="step active" data-step="1">
-            <div class="step-circle">1</div>
-            <span class="step-label">Cart</span>
-          </div>
-          <div class="step-line"></div>
-          <div class="step" data-step="2">
-            <div class="step-circle">2</div>
-            <span class="step-label">Information</span>
-          </div>
-          <div class="step-line"></div>
-          <div class="step" data-step="3">
-            <div class="step-circle">3</div>
-            <span class="step-label">Payment</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 1: Cart Review (Visible by default) -->
-      <div class="cart-page" id="cartStep">
-        <h1 class="cart-title">Shopping Cart</h1>
-
-        <div id="empty-cart">
-          <h2>Your cart is currently empty.</h2>
-          <p>Looks like you haven’t added anything to your cart yet.</p>
-
-          <a href="{% url 'all_products' %}" class="return-shop-btn">
-            Return to Shop
-          </a>
-        </div>
-
-        <!-- LEFT : CART ITEMS -->
-        <div class="cart-left">
-          <!-- ADDED: Cart table container wrapper -->
-          <div class="cart-table-container">
-            <table class="cart-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Quantity</th>
-                  <th>Subtotal</th>
-                  <th></th>
-                </tr>
-              </thead>
-
-              <tbody id="cart-items">
-                <!-- JS will inject rows here -->
-                <!-- Sample row structure for JavaScript to replicate:
-                <tr>
-                  <td data-label="Product">
-                    <div class="cart-product">
-                      <img src="{% static 'img/product.jpg' %}" alt="Product Name">
-                      <span>Product Name</span>
-                    </div>
-                  </td>
-                  <td data-label="Price">Rs 2499</td>
-                  <td data-label="Quantity">
-                    <div class="qty-wrapper">
-                      <button class="qty-btn minus" data-index="0">-</button>
-                      <span class="qty-value" data-index="0">1</span>
-                      <button class="qty-btn plus" data-index="0">+</button>
-                    </div>
-                  </td>
-                  <td data-label="Subtotal">Rs 2499</td>
-                  <td data-label="Remove">
-                    <button class="remove-item" data-index="0">&times;</button>
-                  </td>
-                </tr>
-                -->
-              </tbody>
-            </table>
-          </div>
-
-          <div id="empty-cart">
-            <h2>Your cart is currently empty.</h2>
-            <p>Looks like you haven't added any products to your cart yet.</p>
-            <a href="{% url 'all_products' %}" class="return-shop-btn">
-              Return to Shop
-            </a>
+          <div class="cart-empty-msg" id="cartEmptyMsg" style="display:none;">
+            <p>Your cart is empty. <a href="{% url 'all_products' %}">Continue Shopping</a></p>
           </div>
 
           <div class="cart-actions">
-            <a href="{% url 'all_products' %}" class="btn-outline"
-              ><ion-icon name="arrow-back-outline"></ion-icon> Continue
-              Shopping</a
-            >
-            <button class="btn-gray" id="update-cart">Update Cart</button>
+            <a href="{% url 'all_products' %}">
+              <button class="continue-btn">← Continue Shopping</button>
+            </a>
+            <button class="clear-cart-btn" id="clearCartBtn">Clear Cart</button>
           </div>
         </div>
 
-        <!-- RIGHT : CART TOTALS -->
-        <div class="cart-right">
-          <!-- CHANGED: Added cart-summary class -->
-          <div class="cart-summary">
-            <h3>Cart Totals</h3>
+        <!-- Cart Totals -->
+        <div class="cart-totals-section">
+          <h3>Cart Totals</h3>
 
-            <div class="totals-row">
-              <span>Subtotal</span>
-              <span id="cart-subtotal">0.00 Rs</span>
-            </div>
-
-            <div class="shipping">
-              <p>Shipping</p>
-
-              <label>
-                <input type="radio" name="ship" data-cost="250" />
-                <span>Delivery via Advance Payment: 250 Rs</span>
-              </label>
-              <label>
-                <input type="radio" name="ship" data-cost="350" />
-                <span>Daewoo FastEx: 350 Rs</span>
-              </label>
-              <label>
-                <input type="radio" name="ship" data-cost="350" />
-                <span>Leopard Courier: 350 Rs</span>
-              </label>
-              <label>
-                <input type="radio" name="ship" data-cost="350" />
-                <span>TCS Courier: 350 Rs</span>
-              </label>
-              <label>
-                <input type="radio" name="ship" data-cost="250" />
-                <span>Within Multan: 250 Rs</span>
-              </label>
-              <label>
-                <input type="radio" name="ship" data-cost="0" checked />
-                <span>Self Pickup (Multan)</span>
-              </label>
-            </div>
-
-            <div class="totals-row total">
-              <span>Total</span>
-              <span id="cart-total">0.00 Rs</span>
-            </div>
-
-            <div class="checkout-container">
-              <button class="checkout-btn" id="startCheckoutBtn">
-                Proceed to Checkout
-              </button>
-            </div>
+          <div class="totals-row">
+            <span>Subtotal</span>
+            <span id="cartSubtotal">Rs 0</span>
           </div>
-        </div>
-      </div>
-
-      <!-- Step 2: Customer Information (Hidden by default) -->
-      <div class="checkout-step" id="infoStep" style="display: none">
-        <div class="checkout-wrapper">
-          <div class="checkout-left">
-            <h2 class="checkout-title">Customer Information</h2>
-
-            <form class="checkout-form" id="infoForm">
-              <div class="form-row">
-                <div class="form-group required">
-                  <label for="firstName">First Name</label>
-                  <input type="text" id="firstName" required />
-                </div>
-                <div class="form-group required">
-                  <label for="lastName">Last Name</label>
-                  <input type="text" id="lastName" required />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="company">Company Name (Optional)</label>
-                <input type="text" id="company" />
-              </div>
-
-              <div class="form-group required">
-                <label for="phone">Phone </label>
-                <input type="tel" id="phone" required />
-              </div>
-
-              <div class="form-group required">
-                <label for="email">Email Address </label>
-                <input type="email" id="email" required />
-              </div>
-
-              <div class="form-group required">
-                <label for="address">Street Address </label>
-                <input
-                  type="text"
-                  id="address"
-                  placeholder="House number and street name"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="address2">Address Line 2 (Optional)</label>
-                <input
-                  type="text"
-                  id="address2"
-                  placeholder="Apartment, suite, unit, etc."
-                />
-              </div>
-
-              <div class="form-row">
-                <div class="form-group required">
-                  <label for="city">Town / City </label>
-                  <input type="text" id="city" required />
-                </div>
-                <div class="form-group required">
-                  <label for="province">Province </label>
-                  <select id="province" required>
-                    <option value="">Select a province...</option>
-                    <option value="Punjab">Punjab</option>
-                    <option value="Sindh">Sindh</option>
-                    <option value="KPK">Khyber Pakhtunkhwa</option>
-                    <option value="Balochistan">Balochistan</option>
-                    <option value="Gilgit">Gilgit-Baltistan</option>
-                    <option value="AJK">Azad Jammu & Kashmir</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="form-group required">
-                <label for="postcode">Postcode / ZIP </label>
-                <input type="text" id="postcode" required />
-              </div>
-
-              <div class="form-group">
-                <label for="orderNotes">Order Notes (Optional)</label>
-                <textarea
-                  id="orderNotes"
-                  rows="4"
-                  placeholder="Notes about your order, e.g. special notes for delivery"
-                ></textarea>
-              </div>
-
-              <div class="step-navigation">
-                <button type="button" class="btn-outline" id="backToCartBtn">
-                  ← Back to Cart
-                </button>
-                <button
-                  type="button"
-                  class="checkout-btn"
-                  id="proceedToPaymentBtn"
-                >
-                  Continue to Payment
-                </button>
-              </div>
-            </form>
+          <div class="totals-row">
+            <span>Shipping</span>
+            <span id="cartShipping">Rs 0</span>
+          </div>
+          <div class="totals-row total-row">
+            <strong>Total</strong>
+            <strong id="cartTotal">Rs 0</strong>
           </div>
 
-          <div class="checkout-right">
-            <div class="order-summary">
-              <h3>Order Summary</h3>
-              <div class="order-items" id="orderItemsPreview">
-                <!-- Order items will be populated -->
-              </div>
-              <div class="order-totals">
-                <div class="order-row">
-                  <span>Subtotal</span>
-                  <span id="orderSubtotal">Rs 0</span>
-                </div>
-                <div class="order-row">
-                  <span>Shipping</span>
-                  <span id="orderShipping">Rs 0</span>
-                </div>
-                <div class="order-row total">
-                  <strong>Total</strong>
-                  <strong id="orderTotal">Rs 0</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 3: Payment (Hidden by default) -->
-      <div class="checkout-step" id="paymentStep" style="display: none">
-        <div class="payment-wrapper">
-          <div class="payment-left">
-            <h2 class="checkout-title">Payment Method</h2>
-
-            <div class="payment-methods">
-              <div class="payment-method">
-                <input
-                  type="radio"
-                  id="cod"
-                  name="payment"
-                  value="cod"
-                  checked
-                />
-                <label for="cod">
-                  <div class="method-header">
-                    <strong>Cash on Delivery</strong>
-                    <span class="method-icon">💵</span>
-                  </div>
-                  <p class="method-desc">Pay when you receive your order</p>
-                </label>
-              </div>
-
-              <!-- ADDED: Credit/Debit Card Payment Method -->
-              <div class="payment-method">
-                <input type="radio" id="card" name="payment" value="card" />
-                <label for="card">
-                  <div class="method-header">
-                    <strong>Credit/Debit Card</strong>
-                    <span class="method-icon">💳</span>
-                  </div>
-                  <p class="method-desc">
-                    Pay securely with your card (Visa, MasterCard)
-                  </p>
-                </label>
-              </div>
-
-              <!-- ADDED: Bank Transfer Payment Method -->
-              <div class="payment-method">
-                <input
-                  type="radio"
-                  id="banktransfer"
-                  name="payment"
-                  value="banktransfer"
-                />
-                <label for="banktransfer">
-                  <div class="method-header">
-                    <strong>Bank Transfer</strong>
-                    <span class="method-icon">🏦</span>
-                  </div>
-                  <p class="method-desc">Direct bank transfer to our account</p>
-                </label>
-              </div>
-            </div>
-
-            <!-- ADDED: Card Payment Form (Hidden by default) -->
-            <div
-              class="card-payment-form"
-              id="cardPaymentForm"
-              style="display: none"
-            >
-              <h3>Card Details</h3>
-              <div class="form-group">
-                <label for="cardNumber">Card Number <span>*</span></label>
-                <input
-                  type="text"
-                  id="cardNumber"
-                  placeholder="1234 5678 9012 3456"
-                  maxlength="19"
-                />
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="expiryDate">Expiry Date <span>*</span></label>
-                  <input
-                    type="text"
-                    id="expiryDate"
-                    placeholder="MM/YY"
-                    maxlength="5"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="cvv">CVV <span>*</span></label>
-                  <input
-                    type="password"
-                    id="cvv"
-                    placeholder="123"
-                    maxlength="4"
-                  />
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="cardName">Name on Card <span>*</span></label>
-                <input type="text" id="cardName" placeholder="John Doe" />
-              </div>
-              <div class="secure-note">
-                <ion-icon name="shield-checkmark-outline"></ion-icon>
-                <span>Your payment is secured with SSL encryption</span>
-              </div>
-            </div>
-
-            <!-- ADDED: Bank Transfer Details (Hidden by default) -->
-            <div
-              class="bank-transfer-details"
-              id="bankTransferDetails"
-              style="display: none"
-            >
-              <h3>Bank Transfer Details</h3>
-              <div class="bank-info">
-                <p><strong>Bank Name:</strong> Habib Bank Limited (HBL)</p>
-                <p><strong>Account Title:</strong> Multan Electronics</p>
-                <p><strong>Account Number:</strong> 1234-5678901-2</p>
-                <p><strong>IBAN:</strong> PK36 HABB 0012 3456 7890 1234</p>
-                <p><strong>Branch:</strong> Gulgasht Colony, Multan</p>
-                <p class="instruction">
-                  Please use your Order ID as the payment reference.
-                </p>
-              </div>
-            </div>
-
-            <div class="terms-agreement">
-              <input type="checkbox" id="terms" required />
-              <label for="terms">
-                I have read and agree to the website
-                <a href="#">terms and conditions</a> <span>*</span>
-              </label>
-            </div>
-
-            <div class="step-navigation">
-              <button type="button" class="btn-outline" id="backToInfoBtn">
-                ← Back to Information
-              </button>
-              <button type="button" class="place-order-btn" id="placeOrderBtn">
-                Place Order
-              </button>
-            </div>
-
-            <div class="secure-checkout">
-              <ion-icon name="lock-closed"></ion-icon>
-              <span>Secure Checkout</span>
-              <p>
-                Your personal information is protected with 256-bit SSL
-                encryption
-              </p>
-            </div>
-          </div>
-
-          <div class="payment-right">
-            <div class="order-summary">
-              <h3>Order Summary</h3>
-              <div class="customer-info-preview">
-                <h4>Customer Information</h4>
-                <div id="customerInfoPreview">
-                  <!-- Will be populated -->
-                </div>
-              </div>
-              <div class="order-items" id="paymentItemsPreview">
-                <!-- Order items preview -->
-              </div>
-              <div class="order-totals">
-                <div class="order-row">
-                  <span>Subtotal</span>
-                  <span id="paymentSubtotal">Rs 0</span>
-                </div>
-                <div class="order-row">
-                  <span>Shipping</span>
-                  <span id="paymentShipping">Rs 0</span>
-                </div>
-                <div class="order-row total">
-                  <strong>Total</strong>
-                  <strong id="paymentTotal">Rs 0</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Order Confirmation Modal -->
-    <div class="confirmation-modal" id="confirmationModal">
-      <div class="confirmation-overlay"></div>
-      <div class="confirmation-box">
-        <div class="confirmation-icon">
-          <ion-icon name="checkmark-circle"></ion-icon>
-        </div>
-        <h2>Order Confirmed!</h2>
-        <p>Your order has been placed successfully.</p>
-        <p class="order-id">
-          Order ID: <strong id="generatedOrderId">#ORD-2025-00123</strong>
-        </p>
-        <p>We've sent a confirmation email to your registered email address.</p>
-        <div class="confirmation-buttons">
-          <button class="continue-shopping-btn" id="continueShoppingBtn">
-            Continue Shopping
-          </button>
-          <button class="view-orders-btn" id="viewOrderDetailsBtn">
-            View Order Details
+          <button class="checkout-btn" id="proceedCheckoutBtn">
+            Proceed to Checkout
           </button>
         </div>
       </div>
     </div>
 
-    <footer class="site-footer">
-      <div class="footer-container">
-        <h2 class="footer-title">Get in touch</h2>
-        <p class="footer-subtitle">CONTACT US</p>
+    <!-- ── STEP 2: CUSTOMER DETAILS ── -->
+    <div class="checkout-view" id="checkoutView" style="display:none;">
+      <h2 class="cart-heading">Billing Details</h2>
 
-        <div class="footer-content">
-          <div class="footer-col">
-            <p>
-              City Mall Near Zavia School System,<br />
-              Gulgasht Colony, Multan
-            </p>
-          </div>
-
-          <div class="footer-col">
-            <p>info@multanelectronics.com</p>
-            <p>+92-300123456</p>
-          </div>
-
-          <div class="footer-col">
-            <a href="#">Shop</a>
-            <a href="#">DIY Projects</a>
-          </div>
-
-          <div class="footer-col">
-            <a href="#">About</a>
-            <a href="#">Track your Orders</a>
-          </div>
+      <div class="checkout-layout">
+        <div class="billing-form">
+          <form id="billingForm" novalidate>
+            {% csrf_token %}
+            <div class="form-row">
+              <div class="form-group">
+                <label>First Name <span class="req">*</span></label>
+                <input type="text" name="first_name" required />
+              </div>
+              <div class="form-group">
+                <label>Last Name <span class="req">*</span></label>
+                <input type="text" name="last_name" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Phone Number <span class="req">*</span></label>
+              <input type="tel" name="phone" required />
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" name="email" />
+            </div>
+            <div class="form-group">
+              <label>Street Address <span class="req">*</span></label>
+              <input type="text" name="address" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>City <span class="req">*</span></label>
+                <input type="text" name="city" required />
+              </div>
+              <div class="form-group">
+                <label>Province</label>
+                <input type="text" name="province" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Order Notes (optional)</label>
+              <textarea name="notes" rows="3"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="back-btn" id="backToCartBtn">← Back to Cart</button>
+              <button type="submit" class="next-btn">Continue to Payment →</button>
+            </div>
+          </form>
         </div>
 
-        <div class="footer-social">
-          <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-linkedin"></ion-icon></a>
-        </div>
-      </div>
-    </footer>
-
-    <div class="footer-bottom-bar">
-      <div class="payment-methods">
-        <i class="fa fa-cc-visa"></i>
-        <i class="fa fa-cc-paypal"></i>
-        <i class="fa fa-cc-mastercard"></i>
-        <i class="fa fa-cc-stripe"></i>
-      </div>
-
-      <div class="f-links">
-        <a href="#">Promo Code</a>
-        <a href="#">My Account</a>
-        <a href="#">Track Your Order</a>
-        <a href="#">About Us</a>
-      </div>
-
-      <div class="footer-copyright">
-        © 2026 Multan Electronics. All Rights Reserved.
-      </div>
-    </div>
-
-    <!-- LOGIN / REGISTER MODAL -->
-    <div class="auth-modal" id="authModal">
-      <div class="auth-overlay"></div>
-      <div class="auth-box">
-        <button class="auth-close" id="closeAuth">&times;</button>
-        <div class="auth-content">
-          <div class="auth-column">
-            <h2>LOGIN</h2>
-            <label>Username or email address</label>
-            <input type="text" />
-            <label>Password</label>
-            <input type="password" />
-            <button class="auth-btn">LOG IN</button>
-            <a href="#" class="lost">Lost your password?</a>
-          </div>
-          <div class="divider"></div>
-          <div class="auth-column">
-            <h2>REGISTER</h2>
-            <label>Email address</label>
-            <input type="email" />
-            <label>Password</label>
-            <input type="password" />
-            <p class="privacy">
-              Your personal data will be used to support your experience
-              throughout this website, to manage access to your account, and for
-              other purposes described in our
-              <a href="#">privacy policy</a>.
-            </p>
-            <button class="auth-btn">REGISTER</button>
+        <!-- Order Summary -->
+        <div class="order-summary">
+          <h3>Your Order</h3>
+          <div id="checkoutItemsList"></div>
+          <div class="order-totals">
+            <div class="order-row"><span>Subtotal</span><span id="checkoutSubtotal">Rs 0</span></div>
+            <div class="order-row"><span>Shipping</span><span id="checkoutShipping">Rs 0</span></div>
+            <div class="order-row total"><strong>Total</strong><strong id="checkoutTotal">Rs 0</strong></div>
           </div>
         </div>
       </div>
     </div>
 
-    <ion-icon name="arrow-up-circle-outline" id="backToTop"></ion-icon>
-    <ion-icon name="logo-whatsapp" class="wp" title="Need Help?"></ion-icon>
+    <!-- ── STEP 3: PAYMENT ── -->
+    <div class="payment-view" id="paymentView" style="display:none;">
+      <h2 class="cart-heading">Payment</h2>
 
-    <!-- <script src="script.js"></script> -->
-     <script type="module" src="{% static 'js/main.js' %}"></script>
+      <div class="checkout-layout">
+        <div class="payment-methods-section">
+          <div class="payment-option">
+            <label>
+              <input type="radio" name="paymentMethod" value="cod" checked />
+              Cash on Delivery (COD)
+            </label>
+          </div>
+          <div class="payment-option">
+            <label>
+              <input type="radio" name="paymentMethod" value="bank" />
+              Bank Transfer
+            </label>
+          </div>
 
-    <script>
-      // Mobile Navigation Toggle
-      document.addEventListener("DOMContentLoaded", function () {
-        const mobileToggle = document.querySelector(".mobile-nav-toggle");
-        const mobileClose = document.querySelector(".mobile-close-btn");
-        const mobileNav = document.querySelector(".mobile-nav-container");
-        const mobileOverlay = document.querySelector(".mobile-nav-overlay");
-        const dropdownToggles = document.querySelectorAll(
-          ".mobile-dropdown-toggle",
-        );
+          <div class="form-actions">
+            <button type="button" class="back-btn" id="backToDetailsBtn">← Back</button>
+            <button class="place-order-btn" id="placeOrderBtn">Place Order</button>
+          </div>
+        </div>
 
-        // Toggle mobile menu
-        function toggleMobileMenu() {
-          mobileNav.classList.toggle("active");
-          mobileOverlay.classList.toggle("active");
-          document.body.style.overflow = mobileNav.classList.contains("active")
-            ? "hidden"
-            : "";
-        }
+        <div class="order-summary">
+          <h3>Your Order</h3>
+          <div id="paymentItemsList"></div>
+          <div class="order-totals">
+            <div class="order-row"><span>Subtotal</span><span id="paymentSubtotal">Rs 0</span></div>
+            <div class="order-row"><span>Shipping</span><span id="paymentShipping">Rs 0</span></div>
+            <div class="order-row total"><strong>Total</strong><strong id="paymentTotal">Rs 0</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        // Open mobile menu
-        if (mobileToggle) {
-          mobileToggle.addEventListener("click", toggleMobileMenu);
-        }
+  </div>
 
-        // Close mobile menu
-        if (mobileClose) {
-          mobileClose.addEventListener("click", toggleMobileMenu);
-        }
+  <!-- ===== ORDER CONFIRMATION MODAL ===== -->
+  <div class="confirmation-modal" id="confirmationModal" style="display:none;">
+    <div class="confirmation-overlay"></div>
+    <div class="confirmation-box">
+      <div class="confirmation-icon">
+        <ion-icon name="checkmark-circle"></ion-icon>
+      </div>
+      <h2>Order Confirmed!</h2>
+      <p>Your order has been placed successfully.</p>
+      <p class="order-id">Order ID: <strong id="generatedOrderId"></strong></p>
+      <p>We'll contact you shortly to confirm delivery details.</p>
+      <div class="confirmation-buttons">
+        <a href="{% url 'home' %}">
+          <button class="continue-shopping-btn">Continue Shopping</button>
+        </a>
+      </div>
+    </div>
+  </div>
 
-        // Close menu when clicking overlay
-        if (mobileOverlay) {
-          mobileOverlay.addEventListener("click", toggleMobileMenu);
-        }
+{% endblock %}
 
-        // Handle dropdown toggles
-        dropdownToggles.forEach((toggle) => {
-          toggle.addEventListener("click", function () {
-            const dropdown = this.nextElementSibling;
-            dropdown.classList.toggle("active");
+{% block extra_scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // ── Helpers ──────────────────────────────────────────────────────
+    function getCart() {
+      return JSON.parse(localStorage.getItem("me_cart") || "[]");
+    }
+    function saveCart(cart) {
+      localStorage.setItem("me_cart", JSON.stringify(cart));
+      document.dispatchEvent(new Event("cartUpdated"));
+    }
+    function fmt(n) { return "Rs " + Number(n).toLocaleString("en-PK"); }
 
-            // Rotate arrow
-            if (dropdown.classList.contains("active")) {
-              this.style.transform = "rotate(90deg)";
-            } else {
-              this.style.transform = "rotate(0deg)";
-            }
-          });
+    function calcTotals(cart) {
+      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+      const shipping = subtotal > 0 ? 250 : 0; // flat Rs 250 shipping
+      return { subtotal, shipping, total: subtotal + shipping };
+    }
+
+    // ── Step management ──────────────────────────────────────────────
+    const views = {
+      cart:     document.getElementById("cartView"),
+      checkout: document.getElementById("checkoutView"),
+      payment:  document.getElementById("paymentView"),
+    };
+    const progress = document.getElementById("checkoutProgress");
+
+    function showView(name, step) {
+      Object.values(views).forEach(v => v.style.display = "none");
+      views[name].style.display = "";
+      if (step) {
+        progress.style.display = "";
+        progress.querySelectorAll(".step").forEach(s => {
+          s.classList.toggle("active", parseInt(s.dataset.step) <= step);
         });
+      } else {
+        progress.style.display = "none";
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-        // Close menu when clicking a link (except dropdown toggles)
-        const mobileLinks = document.querySelectorAll(
-          ".mobile-nav-link, .mobile-account-link, .mobile-cart-link",
-        );
-        mobileLinks.forEach((link) => {
-          link.addEventListener("click", function (e) {
-            if (!this.classList.contains("mobile-dropdown-toggle")) {
-              toggleMobileMenu();
-            }
-          });
+    // ── Render Cart Table ────────────────────────────────────────────
+    function renderCart() {
+      const cart   = getCart();
+      const tbody  = document.getElementById("cartTableBody");
+      const emptyMsg = document.getElementById("cartEmptyMsg");
+      const { subtotal, shipping, total } = calcTotals(cart);
+
+      if (!cart.length) {
+        tbody.innerHTML = "";
+        emptyMsg.style.display = "";
+        document.getElementById("cartSubtotal").textContent = fmt(0);
+        document.getElementById("cartShipping").textContent  = fmt(0);
+        document.getElementById("cartTotal").textContent     = fmt(0);
+        return;
+      }
+
+      emptyMsg.style.display = "none";
+      tbody.innerHTML = cart.map((item, i) => `
+        <tr>
+          <td class="cart-product-col">
+            <img src="${item.img || ''}" alt="${item.name}" />
+            <span>${item.name}</span>
+          </td>
+          <td>${fmt(item.price)}</td>
+          <td>
+            <div class="qty-wrapper">
+              <button class="qty-btn minus" data-index="${i}">-</button>
+              <span class="qty-value">${item.qty}</span>
+              <button class="qty-btn plus"  data-index="${i}">+</button>
+            </div>
+          </td>
+          <td>${fmt(item.price * item.qty)}</td>
+          <td><button class="remove-item-btn" data-index="${i}">✕</button></td>
+        </tr>
+      `).join("");
+
+      document.getElementById("cartSubtotal").textContent = fmt(subtotal);
+      document.getElementById("cartShipping").textContent  = fmt(shipping);
+      document.getElementById("cartTotal").textContent     = fmt(total);
+
+      // Qty buttons
+      tbody.querySelectorAll(".qty-btn.minus").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const cart = getCart();
+          const i = parseInt(btn.dataset.index);
+          if (cart[i].qty > 1) { cart[i].qty--; saveCart(cart); renderCart(); }
         });
-
-        // Handle mobile search
-        const mobileSearchBtn = document.querySelector(
-          ".mobile-search-box button",
-        );
-        if (mobileSearchBtn) {
-          mobileSearchBtn.addEventListener("click", function () {
-            const searchInput = this.previousElementSibling;
-            if (searchInput.value.trim()) {
-              // Perform search
-              console.log("Searching for:", searchInput.value);
-              toggleMobileMenu();
-            }
-          });
-
-          // Allow Enter key in search
-          const searchInput = mobileSearchBtn.previousElementSibling;
-          searchInput.addEventListener("keypress", function (e) {
-            if (e.key === "Enter") {
-              mobileSearchBtn.click();
-            }
-          });
-        }
       });
-    </script>
+      tbody.querySelectorAll(".qty-btn.plus").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const cart = getCart();
+          const i = parseInt(btn.dataset.index);
+          cart[i].qty++;
+          saveCart(cart);
+          renderCart();
+        });
+      });
+      tbody.querySelectorAll(".remove-item-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const cart = getCart();
+          cart.splice(parseInt(btn.dataset.index), 1);
+          saveCart(cart);
+          renderCart();
+        });
+      });
+    }
 
-    <script
-      type="module"
-      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
-    ></script>
-    <script
-      nomodule
-      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
-    ></script>
-  </body>
-</html>
+    // ── Render Order Summary (steps 2 & 3) ───────────────────────────
+    function renderSummary(listId, subtotalId, shippingId, totalId) {
+      const cart = getCart();
+      const { subtotal, shipping, total } = calcTotals(cart);
+      document.getElementById(listId).innerHTML = cart.map(i => `
+        <div class="order-item">
+          <span>${i.name} × ${i.qty}</span>
+          <span>${fmt(i.price * i.qty)}</span>
+        </div>
+      `).join("");
+      document.getElementById(subtotalId).textContent = fmt(subtotal);
+      document.getElementById(shippingId).textContent  = fmt(shipping);
+      document.getElementById(totalId).textContent     = fmt(total);
+    }
+
+    // ── Button wiring ─────────────────────────────────────────────────
+    document.getElementById("clearCartBtn").addEventListener("click", () => {
+      if (confirm("Clear all items from cart?")) { saveCart([]); renderCart(); }
+    });
+
+    document.getElementById("proceedCheckoutBtn").addEventListener("click", () => {
+      if (!getCart().length) return;
+      showView("checkout", 2);
+      renderSummary("checkoutItemsList", "checkoutSubtotal", "checkoutShipping", "checkoutTotal");
+    });
+
+    document.getElementById("backToCartBtn").addEventListener("click", () => {
+      showView("cart", null);
+    });
+
+    document.getElementById("billingForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      // Save billing data so placeOrder() can read it at step 3
+      const fd = new FormData(this);
+      const billing = Object.fromEntries(fd.entries());
+      sessionStorage.setItem("me_billing", JSON.stringify(billing));
+      showView("payment", 3);
+      renderSummary("paymentItemsList", "paymentSubtotal", "paymentShipping", "paymentTotal");
+    });
+
+    document.getElementById("backToDetailsBtn").addEventListener("click", () => {
+      showView("checkout", 2);
+      renderSummary("checkoutItemsList", "checkoutSubtotal", "checkoutShipping", "checkoutTotal");
+    });
+
+    document.getElementById("placeOrderBtn").addEventListener("click", async function () {
+      // Collect billing data saved from step 2 form
+      const billing = JSON.parse(sessionStorage.getItem("me_billing") || "{}");
+
+      this.disabled    = true;
+      this.textContent = "Placing Order…";
+
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || "cod";
+      const result = await placeOrder(billing, paymentMethod);   // defined in main.js
+
+      if (result.success) {
+        document.getElementById("generatedOrderId").textContent = result.orderId;
+        document.getElementById("confirmationModal").style.display = "";
+      } else {
+        alert("Error: " + result.error);
+        this.disabled    = false;
+        this.textContent = "Place Order";
+      }
+    });
+
+    // ── Initial render ───────────────────────────────────────────────
+    renderCart();
+    showView("cart", null);
+  });
+</script>
+{% endblock %}

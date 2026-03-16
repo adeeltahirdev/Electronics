@@ -1,69 +1,71 @@
 import json
 from django.shortcuts import render, get_object_or_404
 from django.core.serializers.json import DjangoJSONEncoder
+from django.urls import reverse
 from .models import Product
 
-def home(request):
-    """
-    Home page view - sends products data as JSON for JS
-    """
-    products = Product.objects.all()
-    products_json = json.dumps([
-        {
-            "id": p.id,
-            "name": p.name,
-            "price": p.price,
-            "img": p.image.url if p.image else "",
-            "description": p.description,
-            "categories": [c.name for c in p.categories.all()] if hasattr(p, "categories") else [],
-            "gallery": [g.url for g in p.gallery.all()] if hasattr(p, "gallery") else [],
-            "notes": p.notes.split(",") if hasattr(p, "notes") and p.notes else [],
-        } for p in products
-    ], cls=DjangoJSONEncoder)
 
-    return render(request, "home.html", {
-        "products": products,
-        "products_json": products_json
-    })
+def _product_to_dict(p, include_full=False):
+    """Serialize a Product to a plain dict for JSON embedding in templates."""
+    data = {
+        "id":         p.id,
+        "name":       p.name,
+        "price":      float(p.price),
+        "img":        p.image.url if p.image else "",
+        "url":        reverse("product_detail", args=[p.pk]),
+        "categories": [c.name for c in p.categories.all()],
+    }
+    if include_full:
+        data.update({
+            "description": p.description or "",
+            "gallery":     [g.image.url for g in p.gallery.all()],
+            "notes":       [n.strip() for n in p.notes.split(",")] if p.notes else [],
+        })
+    return data
 
 
 def all_products(request):
     """
-    All Products page view - JS handles pagination and sorting
+    All Products page.
+    Supports ?search= (name) and ?category= (slug) filtering.
+    Passes the result as JSON for JS-driven sorting & pagination.
     """
-    products = Product.objects.all()
-    products_json = json.dumps([
-        {
-            "id": p.id,
-            "name": p.name,
-            "price": p.price,
-            "img": p.image.url if p.image else "",
-        } for p in products
-    ], cls=DjangoJSONEncoder)
+    qs = Product.objects.prefetch_related("categories", "gallery").all()
+
+    search_q = request.GET.get("search", "").strip()
+    category  = request.GET.get("category", "").strip()
+
+    if search_q:
+        qs = qs.filter(name__icontains=search_q)
+    if category:
+        qs = qs.filter(categories__slug=category).distinct()
+
+    products_json = json.dumps(
+        [_product_to_dict(p) for p in qs],
+        cls=DjangoJSONEncoder,
+    )
 
     return render(request, "all-products.html", {
-        "products": products,
-        "products_json": products_json
+        "products":      qs,
+        "products_json": products_json,
+        "search_q":      search_q,
+        "category":      category,
     })
 
 
 def product_detail(request, pk):
-    """
-    Product detail page - passes the product ID to JS
-    """
-    product = get_object_or_404(Product, pk=pk)
-    product_json = json.dumps({
-        "id": product.id,
-        "name": product.name,
-        "price": product.price,
-        "img": product.image.url if product.image else "",
-        "description": product.description,
-        "categories": [c.name for c in product.categories.all()] if hasattr(product, "categories") else [],
-        "gallery": [g.url for g in product.gallery.all()] if hasattr(product, "gallery") else [],
-        "notes": product.notes.split(",") if hasattr(product, "notes") and product.notes else [],
-    }, cls=DjangoJSONEncoder)
+    """Single product page — passes full product data as JSON for JS."""
+    product = get_object_or_404(
+        Product.objects.prefetch_related("categories", "gallery"),
+        pk=pk,
+    )
+
+    product_json = json.dumps(
+        _product_to_dict(product, include_full=True),
+        cls=DjangoJSONEncoder,
+    )
 
     return render(request, "product-detail.html", {
-        "product": product,
-        "product_json": product_json
+        "product":      product,
+        "product_json": product_json,
     })
