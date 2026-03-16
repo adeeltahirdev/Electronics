@@ -1,0 +1,348 @@
+/* =====================================================
+   CART PAGE — missing classes
+   Append this to the bottom of styles.css
+   ===================================================== */
+
+/* Page heading */
+.cart-heading {
+  font-size: 26px;
+  color: #1e1b4b;
+  margin-bottom: 28px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #eee;
+}
+
+/* Step 1 — two-column layout: table left, totals right */
+.cart-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .cart-layout { grid-template-columns: 1fr; }
+}
+
+/* Left column */
+.cart-items-section {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+/* Right column — totals box */
+.cart-totals-section {
+  background: #f9f9f9;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 24px;
+  position: sticky;
+  top: 100px;
+}
+
+.cart-totals-section h3 {
+  font-size: 18px;
+  color: #1e1b4b;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #eee;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 17px;
+  border-top: 2px solid #eee;
+  padding-top: 14px;
+  margin-top: 8px;
+  color: #1e1b4b;
+}
+
+/* Product column: image + name */
+.cart-product-col {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cart-product-col img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.cart-product-col span {
+  font-weight: 500;
+  color: #1e3a8a;
+  font-size: 14px;
+}
+
+/* Remove button */
+.remove-item-btn {
+  background: #fee2e2;
+  border: none;
+  color: #dc2626;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+}
+
+.remove-item-btn:hover {
+  background: #dc2626;
+  color: #fff;
+}
+
+/* Cart actions row */
+.cart-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.continue-btn {
+  background: transparent;
+  color: #4338ca;
+  border: 2px solid #4338ca;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.continue-btn:hover {
+  background: #4338ca;
+  color: #fff;
+}
+
+.clear-cart-btn {
+  background: transparent;
+  color: #dc2626;
+  border: 2px solid #dc2626;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.clear-cart-btn:hover {
+  background: #dc2626;
+  color: #fff;
+}
+
+/* Empty cart message */
+.cart-empty-msg {
+  text-align: center;
+  padding: 50px 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+.cart-empty-msg a {
+  color: #4338ca;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ── Steps 2 & 3 layout ── */
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .checkout-layout { grid-template-columns: 1fr; }
+  .order-summary { position: static !important; }
+}
+
+/* Billing form */
+.billing-form {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.billing-form .form-group {
+  margin-bottom: 18px;
+}
+
+.billing-form label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.billing-form input,
+.billing-form textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  background: #fafafa;
+}
+
+.billing-form input:focus,
+.billing-form textarea:focus {
+  outline: none;
+  border-color: #4338ca;
+  background: #fff;
+}
+
+.req { color: #dc2626; margin-left: 2px; }
+
+/* Form action buttons */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.back-btn {
+  background: transparent;
+  color: #6b7280;
+  border: 2px solid #d1d5db;
+  padding: 11px 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.back-btn:hover {
+  border-color: #6b7280;
+  color: #111;
+}
+
+.next-btn {
+  background: #4338ca;
+  color: #fff;
+  border: none;
+  padding: 11px 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.25s ease;
+  flex: 1;
+}
+
+.next-btn:hover { background: #3730a3; }
+
+/* Payment options */
+.payment-methods-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.payment-option {
+  margin-bottom: 14px;
+}
+
+.payment-option label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  color: #374151;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.payment-option input[type="radio"] {
+  accent-color: #4338ca;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.payment-option label:has(input:checked) {
+  border-color: #4338ca;
+  background: #f0f0ff;
+  color: #1e1b4b;
+  font-weight: 600;
+}
+
+/* Place order button */
+.place-order-btn {
+  background: #d9774a;
+  color: #fff;
+  border: none;
+  padding: 13px 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.25s ease;
+  flex: 1;
+}
+
+.place-order-btn:hover { background: #b76738; }
+.place-order-btn:disabled { background: #d1d5db; cursor: not-allowed; }
+
+/* Confirmation modal centering */
+.confirmation-modal:not([style*="display: none"]):not([style*="display:none"]) {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Checkout progress step circles */
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+  background: #4338ca;
+  color: #fff;
+}
+
+.step.active .step-label {
+  color: #4338ca;
+  font-weight: 600;
+}

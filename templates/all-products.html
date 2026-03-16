@@ -1,459 +1,146 @@
-<!doctype html>
+{% extends "base.html" %}
 {% load static %}
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
 
-    <title>All-Products</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
-  </head>
-  <body>
-    <div class="top-bar">
-      <div class="container">
-        <span
-          >SHOP TIMING 10:00AM TO 8:00 PM (FRIDAY OFF) CONTACT US
-          +92-300123456</span
-        >
-        <div class="top-links">
-          <a href="#">Promo Code</a>
-          <a href="#">My Account</a>
-          <a href="#">Track Your Order</a>
-          <a href="#">About Us</a>
-          <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
-          <a href="#"><ion-icon name="mail-outline"></ion-icon></a>
-        </div>
-      </div>
+{% block title %}All Products – Multan Electronics{% endblock %}
+
+{% block extra_head %}
+  {# Pass Django data to JavaScript safely #}
+  <script>
+    const PRODUCTS_DATA = {{ products_json|safe }};
+  </script>
+{% endblock %}
+
+{% block content %}
+
+  <!-- ===== ALL PRODUCTS PAGE ===== -->
+  <section class="all-products container">
+
+    <div class="products-top-bar">
+      <h2>Shop</h2>
+      <select id="sortBy">
+        <option value="default">Sort by</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+        <option value="name-asc">Name: A–Z</option>
+        <option value="name-desc">Name: Z–A</option>
+      </select>
     </div>
 
-    <div class="sticky-header">
-      <header class="main-header">
-        <div class="container header-content">
-          <!-- Mobile Hamburger Button -->
-          <button class="mobile-nav-toggle">
-            <i class="fas fa-bars"></i>
-          </button>
+    <!-- Products Grid – populated by JS using PRODUCTS_DATA -->
+    <div class="products-grid" id="productsGrid"></div>
 
-          <div class="logo">
-            <a href="{% url 'home' %}"
-              ><img src="{% static 'img/logo.png' %}" alt="Multan Electronics"
-            /></a>
-          </div>
+    <!-- Pagination – populated by JS -->
+    <div class="pagination" id="pagination"></div>
 
-          <div class="search-box">
-            <input type="text" placeholder="Search..." />
-            <button>🔍</button>
-          </div>
+  </section>
 
-          <div class="account cart-wrapper">
-            <a href="#" class="desktop-login">LOGIN</a>
-            <div class="vr"></div>
+{% endblock %}
 
-            <div class="cart-icon">
-              <a href="{% url 'cart' %}">CART</a>
-              <span class="cart-count">0</span>
+{% block extra_scripts %}
+<script>
+  // ── All Products: sorting, filtering, pagination ──────────────────────────
+  document.addEventListener("DOMContentLoaded", function () {
+    const PRODUCTS_PER_PAGE = 16;
+    let currentPage = 1;
+    let filteredProducts = [...PRODUCTS_DATA];
 
-              <!-- MINI CART -->
-              <div class="mini-cart" id="miniCart">
-                <h4>Shopping Cart</h4>
+    // Read ?search= and ?category= query params
+    const params   = new URLSearchParams(window.location.search);
+    const searchQ  = (params.get("search")   || "").toLowerCase();
+    const catSlug  = (params.get("category") || "").toLowerCase();
 
-                <div class="mini-cart-items" id="miniCartItems"></div>
+    if (searchQ) {
+      filteredProducts = filteredProducts.filter(p =>
+        p.name.toLowerCase().includes(searchQ)
+      );
+    }
+    if (catSlug) {
+      filteredProducts = filteredProducts.filter(p =>
+        p.categories && p.categories.some(c => c.toLowerCase().replace(/\s+/g, "-") === catSlug)
+      );
+    }
 
-                <div class="mini-cart-footer">
-                  <div class="mini-total">
-                    <span>Total:</span>
-                    <strong id="miniCartTotal">Rs 0</strong>
-                  </div>
+    function sortProducts(arr, mode) {
+      const sorted = [...arr];
+      switch (mode) {
+        case "price-low":  sorted.sort((a, b) => a.price - b.price); break;
+        case "price-high": sorted.sort((a, b) => b.price - a.price); break;
+        case "name-asc":   sorted.sort((a, b) => a.name.localeCompare(b.name)); break;
+        case "name-desc":  sorted.sort((a, b) => b.name.localeCompare(a.name)); break;
+      }
+      return sorted;
+    }
 
-                  <div class="cnt">
-                    <a href="{% url 'cart' %}"
-                      ><button class="view-cart-btn">View Cart</button></a
-                    >
-                    <a href="{% url 'checkout' %}"
-                      ><button class="check-out-btn">Checkout</button></a
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+    function renderProducts(products, page) {
+      const grid  = document.getElementById("productsGrid");
+      const start = (page - 1) * PRODUCTS_PER_PAGE;
+      const slice = products.slice(start, start + PRODUCTS_PER_PAGE);
 
-      <nav class="nav-bar">
-        <ul class="nav-menu">
-          <li><a href="{% url 'all_products' %}">ALL PRODUCTS</a></li>
+      if (!slice.length) {
+        grid.innerHTML = '<p class="no-products">No products found.</p>';
+        return;
+      }
 
-          <li class="has-dropdown">
-            <a href="#">3D PRINTERS ▾</a>
-            <div class="dropdown">
-              <a href="#">Ender 3</a>
-              <a href="#">Prusa i3</a>
-              <a href="#">Anycubic</a>
-              <a href="#">Resin Printers</a>
-            </div>
-          </li>
-
-          <li class="has-dropdown">
-            <a href="#">MICROCONTROLLERS & BOARDS ▾</a>
-            <div class="dropdown">
-              <a href="#">Arduino</a>
-              <a href="#">ESP32</a>
-              <a href="#">ESP8266</a>
-              <a href="#">Raspberry Pi</a>
-            </div>
-          </li>
-
-          <li><a href="#">CNC & 3D PRINTER PARTS</a></li>
-          <li><a href="#">INCUBATORS PARTS</a></li>
-          <li><a href="#">LASER MODULES</a></li>
-          <li><a href="#">QUADCOPTER & PARTS</a></li>
-          <li><a href="#">DIY PROJECTS</a></li>
-        </ul>
-      </nav>
-    </div>
-
-    <!-- Mobile Navigation Overlay -->
-    <div class="mobile-nav-overlay"></div>
-
-    <!-- Mobile Navigation Menu -->
-    <div class="mobile-nav-container">
-      <div class="mobile-nav-header">
-        <h3>Menu</h3>
-        <button class="mobile-close-btn">&times;</button>
-      </div>
-
-      <div class="mobile-nav-content">
-        <!-- Mobile Search -->
-        <div class="mobile-search-box">
-          <input type="text" placeholder="Search products..." />
-          <button>
-            <i class="fas fa-search"></i>
-          </button>
-        </div>
-
-        <!-- Mobile Navigation Links -->
-        <ul class="mobile-nav-menu">
-          <li class="mobile-nav-item">
-            <a href="{% url 'all_products' %}" class="mobile-nav-link">ALL PRODUCTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">3D PRINTERS</a>
-            <button class="mobile-dropdown-toggle">›</button>
-            <div class="mobile-dropdown">
-              <div class="mobile-dropdown-item"><a href="#">Ender 3</a></div>
-              <div class="mobile-dropdown-item"><a href="#">Prusa i3</a></div>
-              <div class="mobile-dropdown-item"><a href="#">Anycubic</a></div>
-              <div class="mobile-dropdown-item">
-                <a href="#">Resin Printers</a>
-              </div>
-            </div>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">MICROCONTROLLERS & BOARDS</a>
-            <button class="mobile-dropdown-toggle">›</button>
-            <div class="mobile-dropdown">
-              <div class="mobile-dropdown-item"><a href="#">Arduino</a></div>
-              <div class="mobile-dropdown-item"><a href="#">ESP32</a></div>
-              <div class="mobile-dropdown-item"><a href="#">ESP8266</a></div>
-              <div class="mobile-dropdown-item">
-                <a href="#">Raspberry Pi</a>
-              </div>
-            </div>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">CNC & 3D PRINTER PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">INCUBATORS PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">LASER MODULES</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">QUADCOPTER & PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">DIY PROJECTS</a>
-          </li>
-        </ul>
-
-        <!-- Mobile Account Links -->
-        <div class="mobile-account-section">
-          <h4>Account</h4>
-          <div class="mobile-account-links">
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-user"></i> LOGIN
-            </a>
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-heart"></i> Wishlist
-            </a>
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-history"></i> Order History
-            </a>
-          </div>
-        </div>
-
-        <!-- Mobile Cart -->
-        <div class="mobile-cart-section">
-          <a href="{% url 'cart' %}" class="mobile-cart-link">
-            <div class="mobile-cart-info">
-              <i class="fas fa-shopping-cart"></i>
-              <span>View Cart</span>
-            </div>
-            <div class="mobile-cart-count">0</div>
+      grid.innerHTML = slice.map(p => `
+        <div class="product-card"
+             data-id="${p.id}"
+             data-name="${p.name}"
+             data-price="${p.price}"
+             data-img="${p.img}">
+          <a href="${p.url}">
+            <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
+            <img src="${p.img || '/static/img/placeholder.webp'}" alt="${p.name}" loading="lazy" />
+            <h3>${p.name}</h3>
+            <p class="price">Rs ${Number(p.price).toLocaleString("en-PK")}</p>
           </a>
+          <button class="add-cart"
+                  data-id="${p.id}"
+                  data-name="${p.name}"
+                  data-price="${p.price}"
+                  data-img="${p.img}">
+            Add to Cart
+          </button>
         </div>
-      </div>
-    </div>
+      `).join("");
+    }
 
-    <!-- ================= ALL PRODUCTS PAGE ================= -->
-    <section class="all-products container">
-      <!-- Top Bar -->
-      <div class="products-top-bar">
-        <h2>Shop</h2>
+    function renderPagination(products, page) {
+      const total = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+      const pag   = document.getElementById("pagination");
+      if (total <= 1) { pag.innerHTML = ""; return; }
 
-        <select id="sortBy">
-          <option value="default">Sort by</option>
-          <option value="price-low">Price: Low to High</option>
-          <option value="price-high">Price: High to Low</option>
-          <option value="name-asc">Name: A–Z</option>
-          <option value="name-desc">Name: Z–A</option>
-        </select>
-      </div>
+      let html = "";
+      if (page > 1) html += `<button class="page-btn" data-page="${page - 1}">‹ Prev</button>`;
+      for (let i = 1; i <= total; i++) {
+        html += `<button class="page-btn ${i === page ? "active" : ""}" data-page="${i}">${i}</button>`;
+      }
+      if (page < total) html += `<button class="page-btn" data-page="${page + 1}">Next ›</button>`;
+      pag.innerHTML = html;
 
-      <!-- Products Grid -->
-      <div class="products-grid" id="productsGrid">
-        <!-- Product cards injected here -->
-      </div>
-
-      <!-- Pagination -->
-      <div class="pagination" id="pagination"></div>
-    </section>
-
-    <footer class="site-footer">
-      <div class="footer-container">
-        <h2 class="footer-title">Get in touch</h2>
-        <p class="footer-subtitle">CONTACT US</p>
-
-        <div class="footer-content">
-          <div class="footer-col">
-            <p>
-              City Mall Near Zavia School System,<br />
-              Gulgasht Colony, Multan
-            </p>
-          </div>
-
-          <div class="footer-col">
-            <p>info@multanelectronics.com</p>
-            <p>+92-300123456</p>
-          </div>
-
-          <div class="footer-col">
-            <a href="#">Shop</a>
-            <a href="#">DIY Projects</a>
-          </div>
-
-          <div class="footer-col">
-            <a href="#">About</a>
-            <a href="#">Track your Orders</a>
-          </div>
-        </div>
-
-        <div class="footer-social">
-          <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-linkedin"></ion-icon></a>
-        </div>
-      </div>
-    </footer>
-
-    <div class="footer-bottom-bar">
-      <div class="payment-methods">
-        <i class="fa fa-cc-visa"></i>
-        <i class="fa fa-cc-paypal"></i>
-        <i class="fa fa-cc-mastercard"></i>
-        <i class="fa fa-cc-stripe"></i>
-      </div>
-
-      <div class="f-links">
-        <a href="#">Promo Code</a>
-        <a href="#">My Account</a>
-        <a href="#">Track Your Order</a>
-        <a href="#">About Us</a>
-      </div>
-
-      <div class="footer-copyright">
-        © 2026 Multan Electronics. All Rights Reserved.
-      </div>
-    </div>
-
-    <!-- LOGIN / REGISTER MODAL -->
-    <div class="auth-modal" id="authModal">
-      <div class="auth-overlay"></div>
-
-      <div class="auth-box">
-        <button class="auth-close" id="closeAuth">&times;</button>
-
-        <div class="auth-content">
-          <!-- LOGIN -->
-          <div class="auth-column">
-            <h2>LOGIN</h2>
-
-            <label>Username or email address</label>
-            <input type="text" />
-
-            <label>Password</label>
-            <input type="password" />
-
-            <button class="auth-btn">LOG IN</button>
-            <a href="#" class="lost">Lost your password?</a>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- REGISTER -->
-          <div class="auth-column">
-            <h2>REGISTER</h2>
-
-            <label>Email address</label>
-            <input type="email" />
-
-            <label>Password</label>
-            <input type="password" />
-
-            <p class="privacy">
-              Your personal data will be used to support your experience
-              throughout this website, to manage access to your account, and for
-              other purposes described in our
-              <a href="#">privacy policy</a>.
-            </p>
-
-            <button class="auth-btn">REGISTER</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <ion-icon name="arrow-up-circle-outline" id="backToTop"></ion-icon>
-    <ion-icon name="logo-whatsapp" class="wp" title="Need Help?"></ion-icon>
-
-    <!-- <script src="product.js" defer></script> -->
-    <!-- <script src="script.js"></script> -->
-     <script type="module" src="{% static 'js/main.js' %}"></script>
-
-    <script>
-      // Mobile Navigation Toggle
-      document.addEventListener("DOMContentLoaded", function () {
-        const mobileToggle = document.querySelector(".mobile-nav-toggle");
-        const mobileClose = document.querySelector(".mobile-close-btn");
-        const mobileNav = document.querySelector(".mobile-nav-container");
-        const mobileOverlay = document.querySelector(".mobile-nav-overlay");
-        const dropdownToggles = document.querySelectorAll(
-          ".mobile-dropdown-toggle",
-        );
-
-        // Toggle mobile menu
-        function toggleMobileMenu() {
-          mobileNav.classList.toggle("active");
-          mobileOverlay.classList.toggle("active");
-          document.body.style.overflow = mobileNav.classList.contains("active")
-            ? "hidden"
-            : "";
-        }
-
-        // Open mobile menu
-        if (mobileToggle) {
-          mobileToggle.addEventListener("click", toggleMobileMenu);
-        }
-
-        // Close mobile menu
-        if (mobileClose) {
-          mobileClose.addEventListener("click", toggleMobileMenu);
-        }
-
-        // Close menu when clicking overlay
-        if (mobileOverlay) {
-          mobileOverlay.addEventListener("click", toggleMobileMenu);
-        }
-
-        // Handle dropdown toggles
-        dropdownToggles.forEach((toggle) => {
-          toggle.addEventListener("click", function () {
-            const dropdown = this.nextElementSibling;
-            dropdown.classList.toggle("active");
-
-            // Rotate arrow
-            if (dropdown.classList.contains("active")) {
-              this.style.transform = "rotate(90deg)";
-            } else {
-              this.style.transform = "rotate(0deg)";
-            }
-          });
+      pag.querySelectorAll(".page-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentPage = parseInt(btn.dataset.page);
+          renderProducts(filteredProducts, currentPage);
+          renderPagination(filteredProducts, currentPage);
+          window.scrollTo({ top: 0, behavior: "smooth" });
         });
-
-        // Close menu when clicking a link (except dropdown toggles)
-        const mobileLinks = document.querySelectorAll(
-          ".mobile-nav-link, .mobile-account-link, .mobile-cart-link",
-        );
-        mobileLinks.forEach((link) => {
-          link.addEventListener("click", function (e) {
-            if (!this.classList.contains("mobile-dropdown-toggle")) {
-              toggleMobileMenu();
-            }
-          });
-        });
-
-        // Handle mobile search
-        const mobileSearchBtn = document.querySelector(
-          ".mobile-search-box button",
-        );
-        if (mobileSearchBtn) {
-          mobileSearchBtn.addEventListener("click", function () {
-            const searchInput = this.previousElementSibling;
-            if (searchInput.value.trim()) {
-              // Perform search
-              console.log("Searching for:", searchInput.value);
-              toggleMobileMenu();
-            }
-          });
-
-          // Allow Enter key in search
-          const searchInput = mobileSearchBtn.previousElementSibling;
-          searchInput.addEventListener("keypress", function (e) {
-            if (e.key === "Enter") {
-              mobileSearchBtn.click();
-            }
-          });
-        }
       });
-    </script>
+    }
 
-    <script
-      type="module"
-      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
-    ></script>
-    <script
-      nomodule
-      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
-    ></script>
-  </body>
-</html>
+    function refresh() {
+      renderProducts(filteredProducts, currentPage);
+      renderPagination(filteredProducts, currentPage);
+    }
+
+    // Sort dropdown
+    document.getElementById("sortBy").addEventListener("change", function () {
+      filteredProducts = sortProducts(filteredProducts, this.value);
+      currentPage = 1;
+      refresh();
+    });
+
+    // Initial render
+    refresh();
+  });
+</script>
+{% endblock %}

@@ -1,880 +1,173 @@
-<!doctype html>
+{% extends "base.html" %}
 {% load static %}
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
 
-    <title>Multan Electronics</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
-  </head>
-  <body>
-    <div class="top-bar">
-      <div class="container">
-        <span
-          >SHOP TIMING 10:00AM TO 8:00 PM (FRIDAY OFF) CONTACT US
-          +92-300123456</span
-        >
-        <div class="top-links">
-          <a href="#">Promo Code</a>
-          <a href="#">My Account</a>
-          <a href="#">Track Your Order</a>
-          <a href="#">About Us</a>
-          <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
-          <a href="#"><ion-icon name="mail-outline"></ion-icon></a>
+{% block title %}Multan Electronics – Home{% endblock %}
+
+{% block content %}
+
+  <!-- ===== HERO CAROUSEL ===== -->
+  <section class="hero-carousel">
+    <div class="carousel-track">
+
+      <!-- Slide 1 -->
+      <div class="hero-slide active">
+        <img src="{% static 'img/hero.jpg' %}" alt="CNC Laser" />
+        <div class="hero-card">
+          <h1>CNC LASER</h1>
+          <h2>10/15/20/30/40/80W</h2>
+          <p>
+            Multan Electronics Provides Custom Made Laser CNC according to
+            customer demand i.e Different Bed Size, Different laser Wattage at
+            Cheap Price Guaranteed.
+          </p>
+          <button class="btn">BUY NOW</button>
         </div>
       </div>
-    </div>
 
-    <div class="sticky-header">
-      <header class="main-header">
-        <div class="container header-content">
-          <!-- Mobile Hamburger Button -->
-          <button class="mobile-nav-toggle">
-            <i class="fas fa-bars"></i>
-          </button>
-
-          <div class="logo">
-            <a href="{% url 'home' %}"><img src="{% static 'img/logo.png' %}" alt="Multan Electronics" /></a>
-          </div>
-
-          <div class="search-box">
-            <input type="text" placeholder="Search..." />
-            <button>🔍</button>
-          </div>
-
-          <div class="account cart-wrapper">
-            <a href="#" class="desktop-login">LOGIN</a>
-            <div class="vr"></div>
-
-            <div class="cart-icon">
-              <a href="{% url 'cart' %}">CART</a>
-              <span class="cart-count">0</span>
-
-              <!-- MINI CART -->
-              <div class="mini-cart" id="miniCart">
-                <h4>Shopping Cart</h4>
-
-                <div class="mini-cart-items" id="miniCartItems"></div>
-
-                <div class="mini-cart-footer">
-                  <div class="mini-total">
-                    <span>Total:</span>
-                    <strong id="miniCartTotal">Rs 0</strong>
-                  </div>
-
-                  <div class="cnt">
-                    <a href="{% url 'cart' %}"
-                      ><button class="view-cart-btn">View Cart</button></a
-                    >
-                    <a href="{% url 'checkout' %}"
-                      ><button class="check-out-btn">Checkout</button></a
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <!-- Slide 2 -->
+      <div class="hero-slide">
+        <img src="{% static 'img/hero.webp' %}" alt="Final Year Projects" />
+        <div class="hero-card dark">
+          <h1>FINAL YEAR<br />PROJECTS FOR</h1>
+          <h2>Electronics / Mechanical / IT Students</h2>
+          <p>
+            We provide all semester projects and final year projects according
+            to student requirements.
+          </p>
+          <button class="dark-btn">VIEW ALL PROJECTS</button>
         </div>
-      </header>
-
-      <nav class="nav-bar">
-        <ul class="nav-menu">
-          <li><a href="{% url 'all_products' %}">ALL PRODUCTS</a></li>
-
-          <li class="has-dropdown">
-            <a href="#">3D PRINTERS ▾</a>
-            <div class="dropdown">
-              <a href="#">Ender 3</a>
-              <a href="#">Prusa i3</a>
-              <a href="#">Anycubic</a>
-              <a href="#">Resin Printers</a>
-            </div>
-          </li>
-
-          <li class="has-dropdown">
-            <a href="#">MICROCONTROLLERS & BOARDS ▾</a>
-            <div class="dropdown">
-              <a href="#">Arduino</a>
-              <a href="#">ESP32</a>
-              <a href="#">ESP8266</a>
-              <a href="#">Raspberry Pi</a>
-            </div>
-          </li>
-
-          <li><a href="#">CNC & 3D PRINTER PARTS</a></li>
-          <li><a href="#">INCUBATORS PARTS</a></li>
-          <li><a href="#">LASER MODULES</a></li>
-          <li><a href="#">QUADCOPTER & PARTS</a></li>
-          <li><a href="#">DIY PROJECTS</a></li>
-        </ul>
-      </nav>
-    </div>
-
-    <!-- Mobile Navigation Overlay -->
-    <div class="mobile-nav-overlay"></div>
-
-    <!-- Mobile Navigation Menu -->
-    <div class="mobile-nav-container">
-      <div class="mobile-nav-header">
-        <h3>Menu</h3>
-        <button class="mobile-close-btn">&times;</button>
       </div>
 
-      <div class="mobile-nav-content">
-        <!-- Mobile Search -->
-        <div class="mobile-search-box">
-          <input type="text" placeholder="Search products..." />
-          <button>
-            <i class="fas fa-search"></i>
-          </button>
-        </div>
+    </div>
+    <div class="carousel-dots">
+      <span class="dot active"></span>
+      <span class="dot"></span>
+    </div>
+  </section>
 
-        <!-- Mobile Navigation Links -->
-        <ul class="mobile-nav-menu">
-          <li class="mobile-nav-item">
-            <a href="{% url 'all_products' %}" class="mobile-nav-link">ALL PRODUCTS</a>
-          </li>
+  <!-- ===== BROWSE CATEGORIES ===== -->
+  <section class="categories-section">
+    <h2 class="section-title">BROWSE CATEGORIES</h2>
+    <div class="categories-wrapper">
+      <ion-icon name="arrow-back-circle-outline" class="slide-btn prev"></ion-icon>
 
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">3D PRINTERS</a>
-            <button class="mobile-dropdown-toggle">›</button>
-            <div class="mobile-dropdown">
-              <div class="mobile-dropdown-item"><a href="#">Ender 3</a></div>
-              <div class="mobile-dropdown-item"><a href="#">Prusa i3</a></div>
-              <div class="mobile-dropdown-item"><a href="#">Anycubic</a></div>
-              <div class="mobile-dropdown-item">
-                <a href="#">Resin Printers</a>
-              </div>
-            </div>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">MICROCONTROLLERS & BOARDS</a>
-            <button class="mobile-dropdown-toggle">›</button>
-            <div class="mobile-dropdown">
-              <div class="mobile-dropdown-item"><a href="#">Arduino</a></div>
-              <div class="mobile-dropdown-item"><a href="#">ESP32</a></div>
-              <div class="mobile-dropdown-item"><a href="#">ESP8266</a></div>
-              <div class="mobile-dropdown-item">
-                <a href="#">Raspberry Pi</a>
-              </div>
-            </div>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">CNC & 3D PRINTER PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">INCUBATORS PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">LASER MODULES</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">QUADCOPTER & PARTS</a>
-          </li>
-
-          <li class="mobile-nav-item">
-            <a href="#" class="mobile-nav-link">DIY PROJECTS</a>
-          </li>
-        </ul>
-
-        <!-- Mobile Account Links -->
-        <div class="mobile-account-section">
-          <h4>Account</h4>
-          <div class="mobile-account-links">
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-user"></i> LOGIN
-            </a>
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-heart"></i> Wishlist
-            </a>
-            <a href="#" class="mobile-account-link">
-              <i class="fas fa-history"></i> Order History
-            </a>
-          </div>
-        </div>
-
-        <!-- Mobile Cart -->
-        <div class="mobile-cart-section">
-          <a href="{% url 'cart' %}" class="mobile-cart-link">
-            <div class="mobile-cart-info">
-              <i class="fas fa-shopping-cart"></i>
-              <span>View Cart</span>
-            </div>
-            <div class="mobile-cart-count">0</div>
+      <div class="categories-track">
+        {% for category in categories %}
+          <a href="{% url 'all_products' %}?category={{ category.slug }}" class="category-card">
+            {% if category.image %}
+              <img src="{{ category.image.url }}" alt="{{ category.name }}" />
+            {% else %}
+              <img src="{% static 'img/placeholder.webp' %}" alt="{{ category.name }}" />
+            {% endif %}
+            <h3>{{ category.name|upper }}</h3>
+            <p>{{ category.product_set.count }} PRODUCTS</p>
           </a>
-        </div>
-      </div>
-    </div>
-
-    <section class="hero-carousel">
-      <div class="carousel-track">
-        <!-- Slide 1 -->
-        <div class="hero-slide active">
-          <img src="{% static 'img/hero.jpg' %}" alt="CNC Laser" />
-
-          <div class="hero-card">
-            <h1>CNC LASER</h1>
-            <h2>10/15/20/30/40/80W</h2>
-            <p>
-              Multan Electronics Provides Custom Made Laser CNC according to
-              customer demand i.e Different Bed Size, Different laser Wattage at
-              Cheap Price Guaranteed.
-            </p>
-            <button class="btn">BUY NOW</button>
-          </div>
-        </div>
-
-        <!-- Slide 2 -->
-        <div class="hero-slide">
-          <img src="{% static 'img/hero.webp' %}" alt="Final Year Projects" />
-
-          <div class="hero-card dark">
-            <h1>FINAL YEAR<br />PROJECTS FOR</h1>
-            <h2>Electronics / Mechanical / IT Students</h2>
-            <p>
-              We provide all semester projects and final year projects according
-              to student requirements.
-            </p>
-            <button class="dark-btn">VIEW ALL PROJECTS</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Dots -->
-      <div class="carousel-dots">
-        <span class="dot active"></span>
-        <span class="dot"></span>
-      </div>
-    </section>
-
-    <!-- ===== Browse Categories ===== -->
-    <section class="categories-section">
-      <h2 class="section-title">BROWSE CATEGORIES</h2>
-
-      <div class="categories-wrapper">
-        <ion-icon
-          name="arrow-back-circle-outline"
-          class="slide-btn prev"
-        ></ion-icon>
-
-        <div class="categories-track">
+        {% empty %}
+          {# Fallback static cards if no categories in DB yet #}
           <div class="category-card">
             <img src="{% static 'img/filament.webp' %}" alt="" />
             <h3>3D PRINTER FILAMENTS</h3>
             <p>51 PRODUCTS</p>
           </div>
-
           <div class="category-card">
             <img src="{% static 'img/3dprinter.webp' %}" alt="" />
             <h3>3D PRINTERS</h3>
             <p>59 PRODUCTS</p>
           </div>
-
           <div class="category-card">
             <img src="{% static 'img/accessories.webp' %}" alt="" />
             <h3>3D PRINTERS ACCESSORIES</h3>
             <p>90 PRODUCTS</p>
           </div>
-
           <div class="category-card">
             <img src="{% static 'img/bambu.webp' %}" alt="" />
             <h3>BAMBU LAB & 3D PRINTERS PARTS</h3>
             <p>49 PRODUCTS</p>
           </div>
-
           <div class="category-card">
             <img src="{% static 'img/cnc.webp' %}" alt="" />
             <h3>CNC AND 3D PRINTERS</h3>
             <p>61 PRODUCTS</p>
           </div>
-
-          <div class="category-card">
-            <img src="{% static 'img/filament.webp' %}" alt="" />
-            <h3>3D PRINTER FILAMENTS</h3>
-            <p>51 PRODUCTS</p>
-          </div>
-
-          <div class="category-card">
-            <img src="{% static 'img/3dprinter.webp' %}" alt="" />
-            <h3>3D PRINTERS</h3>
-            <p>59 PRODUCTS</p>
-          </div>
-
-          <div class="category-card">
-            <img src="{% static 'img/accessories.webp' %}" alt="" />
-            <h3>3D PRINTERS ACCESSORIES</h3>
-            <p>90 PRODUCTS</p>
-          </div>
-
-          <div class="category-card">
-            <img src="{% static 'img/bambu.webp' %}" alt="" />
-            <h3>BAMBU LAB & 3D PRINTERS PARTS</h3>
-            <p>49 PRODUCTS</p>
-          </div>
-
-          <div class="category-card">
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>CNC AND 3D PRINTERS</h3>
-            <p>61 PRODUCTS</p>
-          </div>
-        </div>
-
-        <ion-icon
-          name="arrow-forward-circle-outline"
-          class="slide-btn next"
-        ></ion-icon>
-      </div>
-    </section>
-
-    <section class="new-arrival">
-      <h2 class="section-title">NEW ARRIVAL</h2>
-
-      <div class="arrival-wrapper">
-        <ion-icon
-          name="arrow-back-circle-outline"
-          class="arrival-btn prev"
-        ></ion-icon>
-
-        <div class="arrival-track">
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>Arduino UNO R3</h3>
-            <p class="price">Rs 2,499</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>ESP32 Dev Board</h3>
-            <p class="price">Rs 3,200</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>Laser Module 5W</h3>
-            <p class="price">Rs 8,500</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>3D Printer Nozzle</h3>
-            <p class="price">Rs 650</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>PLA Filament 1KG</h3>
-            <p class="price">Rs 4,800</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>3D Printer Nozzle</h3>
-            <p class="price">Rs 650</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>3D Printer Nozzle</h3>
-            <p class="price">Rs 650</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>3D Printer Nozzle</h3>
-            <p class="price">Rs 650</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>3D Printer Nozzle</h3>
-            <p class="price">Rs 650</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>3D Printer Nozzle</h3>
-            <p class="price">Rs 650</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>3D Printer Nozzle</h3>
-            <p class="price">Rs 650</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-          <div class="product-card">
-            <ion-icon
-              name="heart-circle-outline"
-              class="wishlist-btn"
-            ></ion-icon>
-            <img src="{% static 'img/cnc.webp' %}" alt="" />
-            <h3>3D Printer Nozzle</h3>
-            <p class="price">Rs 650</p>
-            <button class="add-cart">Add to Cart</button>
-          </div>
-        </div>
-
-        <ion-icon
-          name="arrow-forward-circle-outline"
-          class="arrival-btn next"
-        ></ion-icon>
-      </div>
-    </section>
-
-    <section class="product-section">
-      <h2 class="section-title">FEATURED PRODUCTS</h2>
-
-      <div class="product-grid">
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/filament.webp' %}" alt="" />
-          <h3>Arduino Mega 2560</h3>
-          <p class="price">Rs 5,500</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/filament.webp' %}" alt="" />
-          <h3>ESP32 CAM Module</h3>
-          <p class="price">Rs 3,800</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/filament.webp' %}" alt="" />
-          <h3>NEMA 17 Stepper Motor</h3>
-          <p class="price">Rs 2,200</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/filament.webp' %}" alt="" />
-          <h3>PLA Filament 1KG</h3>
-          <p class="price">Rs 4,800</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/filament.webp' %}" alt="" />
-          <h3>Arduino UNO R4</h3>
-          <p class="price">Rs 3,900</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="product-section alt-bg">
-      <h2 class="section-title">READY MADE ARDUINO PROJECTS</h2>
-
-      <div class="product-grid">
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/accessories.webp' %}" alt="" />
-          <h3>Smart Home Automation</h3>
-          <p class="price">Rs 18,000</p>
-          <button class="add-cart">View Details</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/accessories.webp' %}" alt="" />
-          <h3>Line Following Robot</h3>
-          <p class="price">Rs 12,500</p>
-          <button class="add-cart">View Details</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/accessories.webp' %}" alt="" />
-          <h3>IoT Energy Meter</h3>
-          <p class="price">Rs 22,000</p>
-          <button class="add-cart">View Details</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/accessories.webp' %}" alt="" />
-          <h3>RFID Attendance System</h3>
-          <p class="price">Rs 14,000</p>
-          <button class="add-cart">View Details</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/accessories.webp' %}" alt="" />
-          <h3>Smart Irrigation System</h3>
-          <p class="price">Rs 16,500</p>
-          <button class="add-cart">View Details</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="product-section">
-      <h2 class="section-title">LASER MODULES</h2>
-
-      <div class="product-grid">
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/3dprinter.webp' %}" alt="" />
-          <h3>Laser Module 5W</h3>
-          <p class="price">Rs 8,500</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/3dprinter.webp' %}" alt="" />
-          <h3>Laser Module 10W</h3>
-          <p class="price">Rs 14,000</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/3dprinter.webp' %}" alt="" />
-          <h3>Laser Module 20W</h3>
-          <p class="price">Rs 22,000</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/3dprinter.webp' %}" alt="" />
-          <h3>Laser Power Supply</h3>
-          <p class="price">Rs 9,500</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/3dprinter.webp' %}" alt="" />
-          <h3>Laser Safety Goggles</h3>
-          <p class="price">Rs 2,800</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="product-section alt-bg">
-      <h2 class="section-title">CNC MACHINES & PARTS</h2>
-
-      <div class="product-grid">
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/bambu.webp' %}" alt="" />
-          <h3>CNC Router 3018</h3>
-          <p class="price">Rs 95,000</p>
-          <button class="add-cart">View Details</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/bambu.webp' %}" alt="" />
-          <h3>Spindle Motor 500W</h3>
-          <p class="price">Rs 18,500</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/bambu.webp' %}" alt="" />
-          <h3>Linear Rail Set</h3>
-          <p class="price">Rs 11,000</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/bambu.webp' %}" alt="" />
-          <h3>CNC Controller Board</h3>
-          <p class="price">Rs 7,800</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-card">
-          <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-          <img src="{% static 'img/bambu.webp' %}" alt="" />
-          <h3>Ball Screw Set</h3>
-          <p class="price">Rs 13,500</p>
-          <button class="add-cart">Add to Cart</button>
-        </div>
-      </div>
-    </section>
-
-    <footer class="site-footer">
-      <div class="footer-container">
-        <h2 class="footer-title">Get in touch</h2>
-        <p class="footer-subtitle">CONTACT US</p>
-
-        <div class="footer-content">
-          <div class="footer-col">
-            <p>
-              City Mall Near Zavia School System,<br />
-              Gulgasht Colony, Multan
-            </p>
-          </div>
-
-          <div class="footer-col">
-            <p>info@multanelectronics.com</p>
-            <p>+92-300123456</p>
-          </div>
-
-          <div class="footer-col">
-            <a href="#">Shop</a>
-            <a href="#">DIY Projects</a>
-          </div>
-
-          <div class="footer-col">
-            <a href="#">About</a>
-            <a href="#">Track your Orders</a>
-          </div>
-        </div>
-
-        <div class="footer-social">
-          <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
-          <a href="#"><ion-icon name="logo-linkedin"></ion-icon></a>
-        </div>
-      </div>
-    </footer>
-
-    <div class="footer-bottom-bar">
-      <div class="payment-methods">
-        <i class="fa fa-cc-visa"></i>
-        <i class="fa fa-cc-paypal"></i>
-        <i class="fa fa-cc-mastercard"></i>
-        <i class="fa fa-cc-stripe"></i>
+        {% endfor %}
       </div>
 
-      <div class="f-links">
-        <a href="#">Promo Code</a>
-        <a href="#">My Account</a>
-        <a href="#">Track Your Order</a>
-        <a href="#">About Us</a>
-      </div>
-
-      <div class="footer-copyright">
-        © 2026 Multan Electronics. All Rights Reserved.
-      </div>
+      <ion-icon name="arrow-forward-circle-outline" class="slide-btn next"></ion-icon>
     </div>
+  </section>
 
-    <!-- LOGIN / REGISTER MODAL -->
-    <div class="auth-modal" id="authModal">
-      <div class="auth-overlay"></div>
+  <!-- ===== NEW ARRIVALS ===== -->
+  <section class="new-arrival">
+    <h2 class="section-title">NEW ARRIVAL</h2>
+    <div class="arrival-wrapper">
+      <ion-icon name="arrow-back-circle-outline" class="arrival-btn prev"></ion-icon>
 
-      <div class="auth-box">
-        <button class="auth-close" id="closeAuth">&times;</button>
-
-        <div class="auth-content">
-          <!-- LOGIN -->
-          <div class="auth-column">
-            <h2>LOGIN</h2>
-
-            <label>Username or email address</label>
-            <input type="text" />
-
-            <label>Password</label>
-            <input type="password" />
-
-            <button class="auth-btn">LOG IN</button>
-            <a href="#" class="lost">Lost your password?</a>
+      <div class="arrival-track">
+        {% for product in new_products %}
+          <div class="product-card"
+               data-id="{{ product.id }}"
+               data-name="{{ product.name }}"
+               data-price="{{ product.price }}"
+               data-img="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/placeholder.webp' %}{% endif %}">
+            <a href="{% url 'product_detail' product.pk %}">
+              <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
+              {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+              {% else %}
+                <img src="{% static 'img/placeholder.webp' %}" alt="{{ product.name }}" />
+              {% endif %}
+              <h3>{{ product.name }}</h3>
+              <p class="price">Rs {{ product.price|floatformat:"0" }}</p>
+            </a>
+            <button class="add-cart"
+                    data-id="{{ product.id }}"
+                    data-name="{{ product.name }}"
+                    data-price="{{ product.price }}"
+                    data-img="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/placeholder.webp' %}{% endif %}">
+              Add to Cart
+            </button>
           </div>
-
-          <div class="divider"></div>
-
-          <!-- REGISTER -->
-          <div class="auth-column">
-            <h2>REGISTER</h2>
-
-            <label>Email address</label>
-            <input type="email" />
-
-            <label>Password</label>
-            <input type="password" />
-
-            <p class="privacy">
-              Your personal data will be used to support your experience
-              throughout this website, to manage access to your account, and for
-              other purposes described in our
-              <a href="#">privacy policy</a>.
-            </p>
-
-            <button class="auth-btn">REGISTER</button>
-          </div>
-        </div>
+        {% empty %}
+          <p class="no-products">No new arrivals yet.</p>
+        {% endfor %}
       </div>
+
+      <ion-icon name="arrow-forward-circle-outline" class="arrival-btn next"></ion-icon>
     </div>
+  </section>
 
-    <ion-icon name="arrow-up-circle-outline" id="backToTop"></ion-icon>
-    <ion-icon name="logo-whatsapp" class="wp" title="Need Help?"></ion-icon>
+  <!-- ===== FEATURED PRODUCTS ===== -->
+  <section class="product-section">
+    <h2 class="section-title">FEATURED PRODUCTS</h2>
+    <div class="product-grid">
+      {% for product in featured_products %}
+        <div class="product-card"
+             data-id="{{ product.id }}"
+             data-name="{{ product.name }}"
+             data-price="{{ product.price }}"
+             data-img="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/placeholder.webp' %}{% endif %}">
+          <a href="{% url 'product_detail' product.pk %}">
+            <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
+            {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+            {% else %}
+              <img src="{% static 'img/placeholder.webp' %}" alt="{{ product.name }}" />
+            {% endif %}
+            <h3>{{ product.name }}</h3>
+            <p class="price">Rs {{ product.price|floatformat:"0" }}</p>
+          </a>
+          <button class="add-cart"
+                  data-id="{{ product.id }}"
+                  data-name="{{ product.name }}"
+                  data-price="{{ product.price }}"
+                  data-img="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/placeholder.webp' %}{% endif %}">
+            Add to Cart
+          </button>
+        </div>
+      {% empty %}
+        <p class="no-products">No featured products yet.</p>
+      {% endfor %}
+    </div>
+  </section>
 
-    <!-- <script src="js/script.js"></script> -->
-    <script src="{% static 'js/main.js' %}"></script>
-
-    <script>
-      // Mobile Navigation Toggle
-      document.addEventListener("DOMContentLoaded", function () {
-        const mobileToggle = document.querySelector(".mobile-nav-toggle");
-        const mobileClose = document.querySelector(".mobile-close-btn");
-        const mobileNav = document.querySelector(".mobile-nav-container");
-        const mobileOverlay = document.querySelector(".mobile-nav-overlay");
-        const dropdownToggles = document.querySelectorAll(
-          ".mobile-dropdown-toggle",
-        );
-
-        // Toggle mobile menu
-        function toggleMobileMenu() {
-          mobileNav.classList.toggle("active");
-          mobileOverlay.classList.toggle("active");
-          document.body.style.overflow = mobileNav.classList.contains("active")
-            ? "hidden"
-            : "";
-        }
-
-        // Open mobile menu
-        if (mobileToggle) {
-          mobileToggle.addEventListener("click", toggleMobileMenu);
-        }
-
-        // Close mobile menu
-        if (mobileClose) {
-          mobileClose.addEventListener("click", toggleMobileMenu);
-        }
-
-        // Close menu when clicking overlay
-        if (mobileOverlay) {
-          mobileOverlay.addEventListener("click", toggleMobileMenu);
-        }
-
-        // Handle dropdown toggles
-        dropdownToggles.forEach((toggle) => {
-          toggle.addEventListener("click", function () {
-            const dropdown = this.nextElementSibling;
-            dropdown.classList.toggle("active");
-
-            // Rotate arrow
-            if (dropdown.classList.contains("active")) {
-              this.style.transform = "rotate(90deg)";
-            } else {
-              this.style.transform = "rotate(0deg)";
-            }
-          });
-        });
-
-        // Close menu when clicking a link (except dropdown toggles)
-        const mobileLinks = document.querySelectorAll(
-          ".mobile-nav-link, .mobile-account-link, .mobile-cart-link",
-        );
-        mobileLinks.forEach((link) => {
-          link.addEventListener("click", function (e) {
-            if (!this.classList.contains("mobile-dropdown-toggle")) {
-              toggleMobileMenu();
-            }
-          });
-        });
-
-        // Handle mobile search
-        const mobileSearchBtn = document.querySelector(
-          ".mobile-search-box button",
-        );
-        if (mobileSearchBtn) {
-          mobileSearchBtn.addEventListener("click", function () {
-            const searchInput = this.previousElementSibling;
-            if (searchInput.value.trim()) {
-              // Perform search
-              console.log("Searching for:", searchInput.value);
-              toggleMobileMenu();
-            }
-          });
-
-          // Allow Enter key in search
-          const searchInput = mobileSearchBtn.previousElementSibling;
-          searchInput.addEventListener("keypress", function (e) {
-            if (e.key === "Enter") {
-              mobileSearchBtn.click();
-            }
-          });
-        }
-      });
-    </script>
-
-    <script
-      type="module"
-      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
-    ></script>
-    <script
-      nomodule
-      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
-    ></script>
-  </body>
-</html>
+{% endblock %}
