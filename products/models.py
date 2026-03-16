@@ -17,8 +17,7 @@ class Product(models.Model):
 
     slug = models.SlugField(unique=True)
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-
+    category = models.ManyToManyField(Category, blank=True, related_name="products")
     description = models.TextField()
 
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -38,6 +37,6 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
 
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="gallery")
 
     image = models.ImageField(upload_to="product_gallery/")
