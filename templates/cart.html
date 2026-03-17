@@ -1,389 +1,434 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "base.html" %} {% load static %} {% block title %} Your Cart – Multan
+Electronics {% endblock %} {% block content %}
 
-{% block title %}Your Cart – Multan Electronics{% endblock %}
+<!-- ===== CART & CHECKOUT PAGE ===== -->
+<div class="cart-checkout-container container">
+  <!-- Checkout Steps Progress Bar -->
+  <div class="checkout-progress" id="checkoutProgress" style="display: none">
+    <div class="progress-steps">
+      <div class="step active" data-step="1">
+        <span class="step-number">1</span>
+        <span class="step-label">Cart</span>
+      </div>
+      <div class="step" data-step="2">
+        <span class="step-number">2</span>
+        <span class="step-label">Details</span>
+      </div>
+      <div class="step" data-step="3">
+        <span class="step-number">3</span>
+        <span class="step-label">Payment</span>
+      </div>
+    </div>
+  </div>
 
-{% block content %}
+  <!-- STEP 1: CART VIEW -->
+  <div class="cart-view" id="cartView">
+    <h2 class="cart-heading">Shopping Cart</h2>
 
-  <!-- ===== CART & CHECKOUT PAGE ===== -->
-  <div class="cart-checkout-container container">
+    <div class="cart-layout">
+      <!-- Cart Items -->
+      <div class="cart-items-section" id="cartTotalsSection">
+        <table class="cart-table" id="cartTable">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Subtotal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cartTableBody">
+            <!-- JS renders rows from localStorage cart -->
+          </tbody>
+        </table>
 
-    <!-- Checkout Steps Progress Bar -->
-    <div class="checkout-progress" id="checkoutProgress" style="display:none;">
-      <div class="progress-steps">
-        <div class="step active" data-step="1">
-          <span class="step-number">1</span>
-          <span class="step-label">Cart</span>
+        <div class="cart-empty-msg" id="cartEmptyMsg" style="display: none">
+          <p>
+            Your cart is empty.
+            <a href="{% url 'all_products' %}">Continue Shopping</a>
+          </p>
         </div>
-        <div class="step" data-step="2">
-          <span class="step-number">2</span>
-          <span class="step-label">Details</span>
+
+        <div class="cart-actions">
+          <a href="{% url 'all_products' %}">
+            <button class="continue-btn">← Continue Shopping</button>
+          </a>
+          <button class="clear-cart-btn" id="clearCartBtn">Clear Cart</button>
         </div>
-        <div class="step" data-step="3">
-          <span class="step-number">3</span>
-          <span class="step-label">Payment</span>
+      </div>
+
+      <!-- Cart Totals -->
+      <div class="cart-totals-section">
+        <h3>Cart Totals</h3>
+
+        <div class="totals-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">Rs 0</span>
+        </div>
+        <div class="totals-row">
+          <span>Shipping</span>
+          <span id="cartShipping">Rs 0</span>
+        </div>
+        <div class="totals-row total-row">
+          <strong>Total</strong>
+          <strong id="cartTotal">Rs 0</strong>
+        </div>
+
+        <button class="checkout-btn" id="proceedCheckoutBtn">
+          Proceed to Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: CUSTOMER DETAILS -->
+  <div class="checkout-view" id="checkoutView" style="display: none">
+    <h2 class="cart-heading">Billing Details</h2>
+
+    <div class="checkout-layout">
+      <div class="billing-form">
+        <form id="billingForm" novalidate>
+          {% csrf_token %}
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name <span class="req">*</span></label>
+              <input type="text" name="first_name" required />
+            </div>
+            <div class="form-group">
+              <label>Last Name <span class="req">*</span></label>
+              <input type="text" name="last_name" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Phone Number <span class="req">*</span></label>
+            <input type="tel" name="phone" required />
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" name="email" />
+          </div>
+          <div class="form-group">
+            <label>Street Address <span class="req">*</span></label>
+            <input type="text" name="address" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>City <span class="req">*</span></label>
+              <input type="text" name="city" required />
+            </div>
+            <div class="form-group">
+              <label>Province</label>
+              <input type="text" name="province" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Order Notes (optional)</label>
+            <textarea name="notes" rows="3"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="back-btn" id="backToCartBtn">
+              ← Back to Cart
+            </button>
+            <button type="submit" class="next-btn">
+              Continue to Payment →
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h3>Your Order</h3>
+        <div id="checkoutItemsList"></div>
+        <div class="order-totals">
+          <div class="order-row">
+            <span>Subtotal</span><span id="checkoutSubtotal">Rs 0</span>
+          </div>
+          <div class="order-row">
+            <span>Shipping</span><span id="checkoutShipping">Rs 0</span>
+          </div>
+          <div class="order-row total">
+            <strong>Total</strong><strong id="checkoutTotal">Rs 0</strong>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ── STEP 1: CART VIEW ── -->
-    <div class="cart-view" id="cartView">
-      <h2 class="cart-heading">Shopping Cart</h2>
+  <!-- STEP 3: PAYMENT -->
+  <div class="payment-view" id="paymentView" style="display: none">
+    <h2 class="cart-heading">Payment</h2>
 
-      <div class="cart-layout">
-        <!-- Cart Items -->
-        <div class="cart-items-section">
-          <table class="cart-table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Subtotal</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="cartTableBody">
-              <!-- JS renders rows from localStorage cart -->
-            </tbody>
-          </table>
-
-          <div class="cart-empty-msg" id="cartEmptyMsg" style="display:none;">
-            <p>Your cart is empty. <a href="{% url 'all_products' %}">Continue Shopping</a></p>
-          </div>
-
-          <div class="cart-actions">
-            <a href="{% url 'all_products' %}">
-              <button class="continue-btn">← Continue Shopping</button>
-            </a>
-            <button class="clear-cart-btn" id="clearCartBtn">Clear Cart</button>
-          </div>
+    <div class="checkout-layout">
+      <div class="payment-methods-section">
+        <div class="payment-option">
+          <label>
+            <input type="radio" name="paymentMethod" value="cod" checked />
+            Cash on Delivery (COD)
+          </label>
+        </div>
+        <div class="payment-option">
+          <label>
+            <input type="radio" name="paymentMethod" value="bank" />
+            Bank Transfer
+          </label>
         </div>
 
-        <!-- Cart Totals -->
-        <div class="cart-totals-section">
-          <h3>Cart Totals</h3>
-
-          <div class="totals-row">
-            <span>Subtotal</span>
-            <span id="cartSubtotal">Rs 0</span>
-          </div>
-          <div class="totals-row">
-            <span>Shipping</span>
-            <span id="cartShipping">Rs 0</span>
-          </div>
-          <div class="totals-row total-row">
-            <strong>Total</strong>
-            <strong id="cartTotal">Rs 0</strong>
-          </div>
-
-          <button class="checkout-btn" id="proceedCheckoutBtn">
-            Proceed to Checkout
+        <div class="form-actions">
+          <button type="button" class="back-btn" id="backToDetailsBtn">
+            ← Back
+          </button>
+          <button class="place-order-btn" id="placeOrderBtn">
+            Place Order
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- ── STEP 2: CUSTOMER DETAILS ── -->
-    <div class="checkout-view" id="checkoutView" style="display:none;">
-      <h2 class="cart-heading">Billing Details</h2>
-
-      <div class="checkout-layout">
-        <div class="billing-form">
-          <form id="billingForm" novalidate>
-            {% csrf_token %}
-            <div class="form-row">
-              <div class="form-group">
-                <label>First Name <span class="req">*</span></label>
-                <input type="text" name="first_name" required />
-              </div>
-              <div class="form-group">
-                <label>Last Name <span class="req">*</span></label>
-                <input type="text" name="last_name" required />
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Phone Number <span class="req">*</span></label>
-              <input type="tel" name="phone" required />
-            </div>
-            <div class="form-group">
-              <label>Email Address</label>
-              <input type="email" name="email" />
-            </div>
-            <div class="form-group">
-              <label>Street Address <span class="req">*</span></label>
-              <input type="text" name="address" required />
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>City <span class="req">*</span></label>
-                <input type="text" name="city" required />
-              </div>
-              <div class="form-group">
-                <label>Province</label>
-                <input type="text" name="province" />
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Order Notes (optional)</label>
-              <textarea name="notes" rows="3"></textarea>
-            </div>
-            <div class="form-actions">
-              <button type="button" class="back-btn" id="backToCartBtn">← Back to Cart</button>
-              <button type="submit" class="next-btn">Continue to Payment →</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Order Summary -->
-        <div class="order-summary">
-          <h3>Your Order</h3>
-          <div id="checkoutItemsList"></div>
-          <div class="order-totals">
-            <div class="order-row"><span>Subtotal</span><span id="checkoutSubtotal">Rs 0</span></div>
-            <div class="order-row"><span>Shipping</span><span id="checkoutShipping">Rs 0</span></div>
-            <div class="order-row total"><strong>Total</strong><strong id="checkoutTotal">Rs 0</strong></div>
+      <div class="order-summary">
+        <h3>Your Order</h3>
+        <div id="paymentItemsList"></div>
+        <div class="order-totals">
+          <div class="order-row">
+            <span>Subtotal</span><span id="paymentSubtotal">Rs 0</span>
+          </div>
+          <div class="order-row">
+            <span>Shipping</span><span id="paymentShipping">Rs 0</span>
+          </div>
+          <div class="order-row total">
+            <strong>Total</strong><strong id="paymentTotal">Rs 0</strong>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- ── STEP 3: PAYMENT ── -->
-    <div class="payment-view" id="paymentView" style="display:none;">
-      <h2 class="cart-heading">Payment</h2>
-
-      <div class="checkout-layout">
-        <div class="payment-methods-section">
-          <div class="payment-option">
-            <label>
-              <input type="radio" name="paymentMethod" value="cod" checked />
-              Cash on Delivery (COD)
-            </label>
-          </div>
-          <div class="payment-option">
-            <label>
-              <input type="radio" name="paymentMethod" value="bank" />
-              Bank Transfer
-            </label>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="back-btn" id="backToDetailsBtn">← Back</button>
-            <button class="place-order-btn" id="placeOrderBtn">Place Order</button>
-          </div>
-        </div>
-
-        <div class="order-summary">
-          <h3>Your Order</h3>
-          <div id="paymentItemsList"></div>
-          <div class="order-totals">
-            <div class="order-row"><span>Subtotal</span><span id="paymentSubtotal">Rs 0</span></div>
-            <div class="order-row"><span>Shipping</span><span id="paymentShipping">Rs 0</span></div>
-            <div class="order-row total"><strong>Total</strong><strong id="paymentTotal">Rs 0</strong></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ===== ORDER CONFIRMATION MODAL ===== -->
-  <div class="confirmation-modal" id="confirmationModal" style="display:none;">
-    <div class="confirmation-overlay"></div>
-    <div class="confirmation-box">
-      <div class="confirmation-icon">
-        <ion-icon name="checkmark-circle"></ion-icon>
-      </div>
-      <h2>Order Confirmed!</h2>
-      <p>Your order has been placed successfully.</p>
-      <p class="order-id">Order ID: <strong id="generatedOrderId"></strong></p>
-      <p>We'll contact you shortly to confirm delivery details.</p>
-      <div class="confirmation-buttons">
-        <a href="{% url 'home' %}">
-          <button class="continue-shopping-btn">Continue Shopping</button>
-        </a>
       </div>
     </div>
   </div>
+</div>
 
-{% endblock %}
+<!-- ORDER CONFIRMATION MODAL -->
+<div class="confirmation-modal" id="confirmationModal" style="display: none">
+  <div class="confirmation-overlay"></div>
+  <div class="confirmation-box">
+    <div class="confirmation-icon">
+      <ion-icon name="checkmark-circle"></ion-icon>
+    </div>
+    <h2>Order Confirmed!</h2>
+    <p>Your order has been placed successfully.</p>
+    <p class="order-id">Order ID: <strong id="generatedOrderId"></strong></p>
+    <p>We'll contact you shortly to confirm delivery details.</p>
+    <div class="confirmation-buttons">
+      <a href="{% url 'home' %}">
+        <button class="continue-shopping-btn">Continue Shopping</button>
+      </a>
+    </div>
+  </div>
+</div>
 
-{% block extra_scripts %}
+{% endblock %} {% block extra_scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // ── Helpers ──────────────────────────────────────────────────────
     function getCart() {
       return JSON.parse(localStorage.getItem("me_cart") || "[]");
     }
+
     function saveCart(cart) {
       localStorage.setItem("me_cart", JSON.stringify(cart));
-      document.dispatchEvent(new Event("cartUpdated"));
+      renderCart();
     }
-    function fmt(n) { return "Rs " + Number(n).toLocaleString("en-PK"); }
+
+    function fmt(n) {
+      return "Rs " + Number(n).toLocaleString("en-PK");
+    }
 
     function calcTotals(cart) {
       const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-      const shipping = subtotal > 0 ? 250 : 0; // flat Rs 250 shipping
+      const shipping = subtotal > 0 ? 250 : 0;
       return { subtotal, shipping, total: subtotal + shipping };
     }
 
-    // ── Step management ──────────────────────────────────────────────
     const views = {
-      cart:     document.getElementById("cartView"),
+      cart: document.getElementById("cartView"),
       checkout: document.getElementById("checkoutView"),
-      payment:  document.getElementById("paymentView"),
+      payment: document.getElementById("paymentView"),
     };
+
     const progress = document.getElementById("checkoutProgress");
 
     function showView(name, step) {
-      Object.values(views).forEach(v => v.style.display = "none");
+      Object.values(views).forEach((v) => (v.style.display = "none"));
       views[name].style.display = "";
       if (step) {
         progress.style.display = "";
-        progress.querySelectorAll(".step").forEach(s => {
-          s.classList.toggle("active", parseInt(s.dataset.step) <= step);
-        });
+        progress
+          .querySelectorAll(".step")
+          .forEach((s) =>
+            s.classList.toggle("active", parseInt(s.dataset.step) <= step),
+          );
       } else {
         progress.style.display = "none";
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    // ── Render Cart Table ────────────────────────────────────────────
+    const table = document.getElementById("cartTable");
+    const tbody = document.getElementById("cartTableBody");
+    const emptyMsg = document.getElementById("cartEmptyMsg");
+    const proceedBtn = document.getElementById("proceedCheckoutBtn");
+    const totalsSection = document.getElementById("cartTotalsSection");
+
     function renderCart() {
-      const cart   = getCart();
-      const tbody  = document.getElementById("cartTableBody");
-      const emptyMsg = document.getElementById("cartEmptyMsg");
+      const cart = getCart();
       const { subtotal, shipping, total } = calcTotals(cart);
 
       if (!cart.length) {
-        tbody.innerHTML = "";
-        emptyMsg.style.display = "";
+        emptyMsg.style.display = "block";
+        table.style.display = "none";
+        // Keep totalsSection visible but hide the table and show empty message
+        document.querySelector(".cart-actions").style.display = "none";
+        document.getElementById("cartTable").style.display = "none";
+
         document.getElementById("cartSubtotal").textContent = fmt(0);
-        document.getElementById("cartShipping").textContent  = fmt(0);
-        document.getElementById("cartTotal").textContent     = fmt(0);
+        document.getElementById("cartShipping").textContent = fmt(0);
+        document.getElementById("cartTotal").textContent = fmt(0);
+        proceedBtn.disabled = true;
         return;
       }
 
       emptyMsg.style.display = "none";
-      tbody.innerHTML = cart.map((item, i) => `
-        <tr>
-          <td class="cart-product-col">
-            <img src="${item.img || ''}" alt="${item.name}" />
-            <span>${item.name}</span>
-          </td>
-          <td>${fmt(item.price)}</td>
-          <td>
-            <div class="qty-wrapper">
-              <button class="qty-btn minus" data-index="${i}">-</button>
-              <span class="qty-value">${item.qty}</span>
-              <button class="qty-btn plus"  data-index="${i}">+</button>
-            </div>
-          </td>
-          <td>${fmt(item.price * item.qty)}</td>
-          <td><button class="remove-item-btn" data-index="${i}">✕</button></td>
-        </tr>
-      `).join("");
+      table.style.display = "table";
+      document.querySelector(".cart-actions").style.display = "flex";
+      document.getElementById("cartTable").style.display = "table";
+      proceedBtn.disabled = false;
+
+      tbody.innerHTML = cart
+        .map(
+          (item, i) => `
+    <tr>
+      <td class="cart-product-col">
+        <img src="${item.img || ""}" alt="${item.name}" />
+        <span>${item.name}</span>
+      </td>
+      <td>${fmt(item.price)}</td>
+      <td>
+        <div class="qty-wrapper">
+          <button class="qty-btn minus" data-index="${i}">-</button>
+          <span class="qty-value">${item.qty}</span>
+          <button class="qty-btn plus" data-index="${i}">+</button>
+        </div>
+      </td>
+      <td>${fmt(item.price * item.qty)}</td>
+      <td>
+        <button class="remove-item-btn" data-index="${i}">✕</button>
+      </td>
+    </tr>
+  `,
+        )
+        .join("");
 
       document.getElementById("cartSubtotal").textContent = fmt(subtotal);
-      document.getElementById("cartShipping").textContent  = fmt(shipping);
-      document.getElementById("cartTotal").textContent     = fmt(total);
+      document.getElementById("cartShipping").textContent = fmt(shipping);
+      document.getElementById("cartTotal").textContent = fmt(total);
 
-      // Qty buttons
-      tbody.querySelectorAll(".qty-btn.minus").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const cart = getCart();
-          const i = parseInt(btn.dataset.index);
-          if (cart[i].qty > 1) { cart[i].qty--; saveCart(cart); renderCart(); }
-        });
+      tbody.querySelectorAll(".minus").forEach((btn) => {
+        btn.onclick = () => {
+          const c = getCart();
+          if (c[+btn.dataset.index].qty > 1) c[+btn.dataset.index].qty--;
+          saveCart(c);
+        };
       });
-      tbody.querySelectorAll(".qty-btn.plus").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const cart = getCart();
-          const i = parseInt(btn.dataset.index);
-          cart[i].qty++;
-          saveCart(cart);
-          renderCart();
-        });
+
+      tbody.querySelectorAll(".plus").forEach((btn) => {
+        btn.onclick = () => {
+          const c = getCart();
+          c[+btn.dataset.index].qty++;
+          saveCart(c);
+        };
       });
-      tbody.querySelectorAll(".remove-item-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const cart = getCart();
-          cart.splice(parseInt(btn.dataset.index), 1);
-          saveCart(cart);
-          renderCart();
-        });
+
+      tbody.querySelectorAll(".remove-item-btn").forEach((btn) => {
+        btn.onclick = () => {
+          const c = getCart();
+          c.splice(+btn.dataset.index, 1);
+          saveCart(c);
+        };
       });
     }
 
-    // ── Render Order Summary (steps 2 & 3) ───────────────────────────
     function renderSummary(listId, subtotalId, shippingId, totalId) {
       const cart = getCart();
       const { subtotal, shipping, total } = calcTotals(cart);
-      document.getElementById(listId).innerHTML = cart.map(i => `
-        <div class="order-item">
-          <span>${i.name} × ${i.qty}</span>
-          <span>${fmt(i.price * i.qty)}</span>
-        </div>
-      `).join("");
+      document.getElementById(listId).innerHTML = cart
+        .map(
+          (i) => `
+      <div class="order-item">
+        <span>${i.name} × ${i.qty}</span>
+        <span>${fmt(i.price * i.qty)}</span>
+      </div>
+    `,
+        )
+        .join("");
       document.getElementById(subtotalId).textContent = fmt(subtotal);
-      document.getElementById(shippingId).textContent  = fmt(shipping);
-      document.getElementById(totalId).textContent     = fmt(total);
+      document.getElementById(shippingId).textContent = fmt(shipping);
+      document.getElementById(totalId).textContent = fmt(total);
     }
 
-    // ── Button wiring ─────────────────────────────────────────────────
-    document.getElementById("clearCartBtn").addEventListener("click", () => {
-      if (confirm("Clear all items from cart?")) { saveCart([]); renderCart(); }
-    });
+    document.getElementById("clearCartBtn").onclick = () => {
+      if (confirm("Clear all items from cart?")) saveCart([]);
+    };
 
-    document.getElementById("proceedCheckoutBtn").addEventListener("click", () => {
+    proceedBtn.onclick = () => {
       if (!getCart().length) return;
       showView("checkout", 2);
-      renderSummary("checkoutItemsList", "checkoutSubtotal", "checkoutShipping", "checkoutTotal");
-    });
+      renderSummary(
+        "checkoutItemsList",
+        "checkoutSubtotal",
+        "checkoutShipping",
+        "checkoutTotal",
+      );
+    };
 
-    document.getElementById("backToCartBtn").addEventListener("click", () => {
-      showView("cart", null);
-    });
+    document.getElementById("backToCartBtn").onclick = () => showView("cart");
 
-    document.getElementById("billingForm").addEventListener("submit", function (e) {
+    document.getElementById("billingForm").onsubmit = (e) => {
       e.preventDefault();
-      // Save billing data so placeOrder() can read it at step 3
-      const fd = new FormData(this);
-      const billing = Object.fromEntries(fd.entries());
-      sessionStorage.setItem("me_billing", JSON.stringify(billing));
+      sessionStorage.setItem(
+        "me_billing",
+        JSON.stringify(Object.fromEntries(new FormData(e.target).entries())),
+      );
       showView("payment", 3);
-      renderSummary("paymentItemsList", "paymentSubtotal", "paymentShipping", "paymentTotal");
-    });
+      renderSummary(
+        "paymentItemsList",
+        "paymentSubtotal",
+        "paymentShipping",
+        "paymentTotal",
+      );
+    };
 
-    document.getElementById("backToDetailsBtn").addEventListener("click", () => {
+    document.getElementById("backToDetailsBtn").onclick = () =>
       showView("checkout", 2);
-      renderSummary("checkoutItemsList", "checkoutSubtotal", "checkoutShipping", "checkoutTotal");
-    });
 
-    document.getElementById("placeOrderBtn").addEventListener("click", async function () {
-      // Collect billing data saved from step 2 form
+    document.getElementById("placeOrderBtn").onclick = async function () {
       const billing = JSON.parse(sessionStorage.getItem("me_billing") || "{}");
-
-      this.disabled    = true;
-      this.textContent = "Placing Order…";
-
-      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || "cod";
-      const result = await placeOrder(billing, paymentMethod);   // defined in main.js
-
+      this.disabled = true;
+      this.textContent = "Placing Order...";
+      const paymentMethod =
+        document.querySelector('input[name="paymentMethod"]:checked')?.value ||
+        "cod";
+      // replace placeOrder() with your AJAX call to server
+      const result = { success: true, orderId: "#123456" }; // demo
       if (result.success) {
-        document.getElementById("generatedOrderId").textContent = result.orderId;
+        document.getElementById("generatedOrderId").textContent =
+          result.orderId;
         document.getElementById("confirmationModal").style.display = "";
+        saveCart([]);
       } else {
         alert("Error: " + result.error);
-        this.disabled    = false;
+        this.disabled = false;
         this.textContent = "Place Order";
       }
-    });
+    };
 
-    // ── Initial render ───────────────────────────────────────────────
     renderCart();
-    showView("cart", null);
+    showView("cart");
   });
 </script>
 {% endblock %}

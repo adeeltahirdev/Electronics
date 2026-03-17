@@ -114,14 +114,26 @@ function initMiniCartToggle() {
   const miniCart = document.getElementById("miniCart");
   if (!cartIcon || !miniCart) return;
 
+  // Toggle mini-cart on icon click
   cartIcon.addEventListener("click", e => {
-    // Don't toggle when clicking the CART link itself
+    // Don't toggle when clicking a link inside the cart icon
     if (e.target.tagName === "A") return;
+
+    // Toggle 'open' class
     miniCart.classList.toggle("open");
   });
 
+  // Close mini-cart when clicking outside
   document.addEventListener("click", e => {
-    if (!cartIcon.contains(e.target)) {
+    // If click is outside both the cart icon and mini-cart, close it
+    if (!cartIcon.contains(e.target) && !miniCart.contains(e.target)) {
+      miniCart.classList.remove("open");
+    }
+  });
+
+  // Optional: close when pressing Escape key
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
       miniCart.classList.remove("open");
     }
   });
