@@ -157,6 +157,7 @@ Electronics {% endblock %} {% block content %}
   </div>
 
   <!-- STEP 3: PAYMENT -->
+  <!-- STEP 3: PAYMENT -->
   <div class="payment-view" id="paymentView" style="display: none">
     <h2 class="cart-heading">Payment</h2>
 
@@ -173,6 +174,25 @@ Electronics {% endblock %} {% block content %}
             <input type="radio" name="paymentMethod" value="bank" />
             Bank Transfer
           </label>
+        </div>
+
+        <!-- Bank Details (Hidden by default) -->
+        <div class="bank-details" id="bankDetails" style="display: none">
+          <h4>Bank Transfer Details</h4>
+          <div class="bank-info">
+            <p><strong>Bank:</strong> Habib Bank Limited (HBL)</p>
+            <p><strong>Account Title:</strong> Multan Electronics</p>
+            <p><strong>Account Number:</strong> 1234-5678-9012-3456</p>
+            <p><strong>IBAN:</strong> PK36HBLP1234567890123456</p>
+            <p><strong>Branch Code:</strong> 1234</p>
+            <div class="bank-note">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              <span
+                >Please transfer the exact amount and share the receipt via
+                WhatsApp or Email</span
+              >
+            </div>
+          </div>
         </div>
 
         <div class="form-actions">
@@ -202,106 +222,105 @@ Electronics {% endblock %} {% block content %}
       </div>
     </div>
   </div>
-</div>
 
-<!-- ORDER CONFIRMATION MODAL -->
-<div class="confirmation-modal" id="confirmationModal" style="display: none">
-  <div class="confirmation-overlay"></div>
-  <div class="confirmation-box">
-    <div class="confirmation-icon">
-      <ion-icon name="checkmark-circle"></ion-icon>
-    </div>
-    <h2>Order Confirmed!</h2>
-    <p>Your order has been placed successfully.</p>
-    <p class="order-id">Order ID: <strong id="generatedOrderId"></strong></p>
-    <p>We'll contact you shortly to confirm delivery details.</p>
-    <div class="confirmation-buttons">
-      <a href="{% url 'home' %}">
-        <button class="continue-shopping-btn">Continue Shopping</button>
-      </a>
+  <!-- ORDER CONFIRMATION MODAL -->
+  <div class="confirmation-modal" id="confirmationModal" style="display: none">
+    <div class="confirmation-overlay"></div>
+    <div class="confirmation-box">
+      <div class="confirmation-icon">
+        <ion-icon name="checkmark-circle"></ion-icon>
+      </div>
+      <h2>Order Confirmed!</h2>
+      <p>Your order has been placed successfully.</p>
+      <p class="order-id">Order ID: <strong id="generatedOrderId"></strong></p>
+      <p>We'll contact you shortly to confirm delivery details.</p>
+      <div class="confirmation-buttons">
+        <a href="{% url 'home' %}">
+          <button class="continue-shopping-btn">Continue Shopping</button>
+        </a>
+      </div>
     </div>
   </div>
-</div>
 
-{% endblock %} {% block extra_scripts %}
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    function getCart() {
-      return JSON.parse(localStorage.getItem("me_cart") || "[]");
-    }
-
-    function saveCart(cart) {
-      localStorage.setItem("me_cart", JSON.stringify(cart));
-      renderCart();
-    }
-
-    function fmt(n) {
-      return "Rs " + Number(n).toLocaleString("en-PK");
-    }
-
-    function calcTotals(cart) {
-      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-      const shipping = subtotal > 0 ? 250 : 0;
-      return { subtotal, shipping, total: subtotal + shipping };
-    }
-
-    const views = {
-      cart: document.getElementById("cartView"),
-      checkout: document.getElementById("checkoutView"),
-      payment: document.getElementById("paymentView"),
-    };
-
-    const progress = document.getElementById("checkoutProgress");
-
-    function showView(name, step) {
-      Object.values(views).forEach((v) => (v.style.display = "none"));
-      views[name].style.display = "";
-      if (step) {
-        progress.style.display = "";
-        progress
-          .querySelectorAll(".step")
-          .forEach((s) =>
-            s.classList.toggle("active", parseInt(s.dataset.step) <= step),
-          );
-      } else {
-        progress.style.display = "none";
-      }
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    const table = document.getElementById("cartTable");
-    const tbody = document.getElementById("cartTableBody");
-    const emptyMsg = document.getElementById("cartEmptyMsg");
-    const proceedBtn = document.getElementById("proceedCheckoutBtn");
-    const totalsSection = document.getElementById("cartTotalsSection");
-
-    function renderCart() {
-      const cart = getCart();
-      const { subtotal, shipping, total } = calcTotals(cart);
-
-      if (!cart.length) {
-        emptyMsg.style.display = "block";
-        table.style.display = "none";
-        // Keep totalsSection visible but hide the table and show empty message
-        document.querySelector(".cart-actions").style.display = "none";
-        document.getElementById("cartTable").style.display = "none";
-
-        document.getElementById("cartSubtotal").textContent = fmt(0);
-        document.getElementById("cartShipping").textContent = fmt(0);
-        document.getElementById("cartTotal").textContent = fmt(0);
-        proceedBtn.disabled = true;
-        return;
+  {% endblock %} {% block extra_scripts %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function getCart() {
+        return JSON.parse(localStorage.getItem("me_cart") || "[]");
       }
 
-      emptyMsg.style.display = "none";
-      table.style.display = "table";
-      document.querySelector(".cart-actions").style.display = "flex";
-      document.getElementById("cartTable").style.display = "table";
-      proceedBtn.disabled = false;
+      function saveCart(cart) {
+        localStorage.setItem("me_cart", JSON.stringify(cart));
+        renderCart();
+      }
 
-      tbody.innerHTML = cart
-        .map(
-          (item, i) => `
+      function fmt(n) {
+        return "Rs " + Number(n).toLocaleString("en-PK");
+      }
+
+      function calcTotals(cart) {
+        const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        const shipping = subtotal > 0 ? 250 : 0;
+        return { subtotal, shipping, total: subtotal + shipping };
+      }
+
+      const views = {
+        cart: document.getElementById("cartView"),
+        checkout: document.getElementById("checkoutView"),
+        payment: document.getElementById("paymentView"),
+      };
+
+      const progress = document.getElementById("checkoutProgress");
+
+      function showView(name, step) {
+        Object.values(views).forEach((v) => (v.style.display = "none"));
+        views[name].style.display = "";
+        if (step) {
+          progress.style.display = "";
+          progress
+            .querySelectorAll(".step")
+            .forEach((s) =>
+              s.classList.toggle("active", parseInt(s.dataset.step) <= step),
+            );
+        } else {
+          progress.style.display = "none";
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      const table = document.getElementById("cartTable");
+      const tbody = document.getElementById("cartTableBody");
+      const emptyMsg = document.getElementById("cartEmptyMsg");
+      const proceedBtn = document.getElementById("proceedCheckoutBtn");
+      const totalsSection = document.getElementById("cartTotalsSection");
+
+      function renderCart() {
+        const cart = getCart();
+        const { subtotal, shipping, total } = calcTotals(cart);
+
+        if (!cart.length) {
+          emptyMsg.style.display = "block";
+          table.style.display = "none";
+          // Keep totalsSection visible but hide the table and show empty message
+          document.querySelector(".cart-actions").style.display = "none";
+          document.getElementById("cartTable").style.display = "none";
+
+          document.getElementById("cartSubtotal").textContent = fmt(0);
+          document.getElementById("cartShipping").textContent = fmt(0);
+          document.getElementById("cartTotal").textContent = fmt(0);
+          proceedBtn.disabled = true;
+          return;
+        }
+
+        emptyMsg.style.display = "none";
+        table.style.display = "table";
+        document.querySelector(".cart-actions").style.display = "flex";
+        document.getElementById("cartTable").style.display = "table";
+        proceedBtn.disabled = false;
+
+        tbody.innerHTML = cart
+          .map(
+            (item, i) => `
     <tr>
       <td class="cart-product-col">
         <img src="${item.img || ""}" alt="${item.name}" />
@@ -321,114 +340,181 @@ Electronics {% endblock %} {% block content %}
       </td>
     </tr>
   `,
-        )
-        .join("");
+          )
+          .join("");
 
-      document.getElementById("cartSubtotal").textContent = fmt(subtotal);
-      document.getElementById("cartShipping").textContent = fmt(shipping);
-      document.getElementById("cartTotal").textContent = fmt(total);
+        document.getElementById("cartSubtotal").textContent = fmt(subtotal);
+        document.getElementById("cartShipping").textContent = fmt(shipping);
+        document.getElementById("cartTotal").textContent = fmt(total);
 
-      tbody.querySelectorAll(".minus").forEach((btn) => {
-        btn.onclick = () => {
-          const c = getCart();
-          if (c[+btn.dataset.index].qty > 1) c[+btn.dataset.index].qty--;
-          saveCart(c);
-        };
-      });
+        tbody.querySelectorAll(".minus").forEach((btn) => {
+          btn.onclick = () => {
+            const c = getCart();
+            if (c[+btn.dataset.index].qty > 1) c[+btn.dataset.index].qty--;
+            saveCart(c);
+          };
+        });
 
-      tbody.querySelectorAll(".plus").forEach((btn) => {
-        btn.onclick = () => {
-          const c = getCart();
-          c[+btn.dataset.index].qty++;
-          saveCart(c);
-        };
-      });
+        tbody.querySelectorAll(".plus").forEach((btn) => {
+          btn.onclick = () => {
+            const c = getCart();
+            c[+btn.dataset.index].qty++;
+            saveCart(c);
+          };
+        });
 
-      tbody.querySelectorAll(".remove-item-btn").forEach((btn) => {
-        btn.onclick = () => {
-          const c = getCart();
-          c.splice(+btn.dataset.index, 1);
-          saveCart(c);
-        };
-      });
-    }
+        tbody.querySelectorAll(".remove-item-btn").forEach((btn) => {
+          btn.onclick = () => {
+            const c = getCart();
+            c.splice(+btn.dataset.index, 1);
+            saveCart(c);
+          };
+        });
+      }
 
-    function renderSummary(listId, subtotalId, shippingId, totalId) {
-      const cart = getCart();
-      const { subtotal, shipping, total } = calcTotals(cart);
-      document.getElementById(listId).innerHTML = cart
-        .map(
-          (i) => `
+      function renderSummary(listId, subtotalId, shippingId, totalId) {
+        const cart = getCart();
+        const { subtotal, shipping, total } = calcTotals(cart);
+        document.getElementById(listId).innerHTML = cart
+          .map(
+            (i) => `
       <div class="order-item">
         <span>${i.name} × ${i.qty}</span>
         <span>${fmt(i.price * i.qty)}</span>
       </div>
     `,
-        )
-        .join("");
-      document.getElementById(subtotalId).textContent = fmt(subtotal);
-      document.getElementById(shippingId).textContent = fmt(shipping);
-      document.getElementById(totalId).textContent = fmt(total);
-    }
-
-    document.getElementById("clearCartBtn").onclick = () => {
-      if (confirm("Clear all items from cart?")) saveCart([]);
-    };
-
-    proceedBtn.onclick = () => {
-      if (!getCart().length) return;
-      showView("checkout", 2);
-      renderSummary(
-        "checkoutItemsList",
-        "checkoutSubtotal",
-        "checkoutShipping",
-        "checkoutTotal",
-      );
-    };
-
-    document.getElementById("backToCartBtn").onclick = () => showView("cart");
-
-    document.getElementById("billingForm").onsubmit = (e) => {
-      e.preventDefault();
-      sessionStorage.setItem(
-        "me_billing",
-        JSON.stringify(Object.fromEntries(new FormData(e.target).entries())),
-      );
-      showView("payment", 3);
-      renderSummary(
-        "paymentItemsList",
-        "paymentSubtotal",
-        "paymentShipping",
-        "paymentTotal",
-      );
-    };
-
-    document.getElementById("backToDetailsBtn").onclick = () =>
-      showView("checkout", 2);
-
-    document.getElementById("placeOrderBtn").onclick = async function () {
-      const billing = JSON.parse(sessionStorage.getItem("me_billing") || "{}");
-      this.disabled = true;
-      this.textContent = "Placing Order...";
-      const paymentMethod =
-        document.querySelector('input[name="paymentMethod"]:checked')?.value ||
-        "cod";
-      // replace placeOrder() with your AJAX call to server
-      const result = { success: true, orderId: "#123456" }; // demo
-      if (result.success) {
-        document.getElementById("generatedOrderId").textContent =
-          result.orderId;
-        document.getElementById("confirmationModal").style.display = "";
-        saveCart([]);
-      } else {
-        alert("Error: " + result.error);
-        this.disabled = false;
-        this.textContent = "Place Order";
+          )
+          .join("");
+        document.getElementById(subtotalId).textContent = fmt(subtotal);
+        document.getElementById(shippingId).textContent = fmt(shipping);
+        document.getElementById(totalId).textContent = fmt(total);
       }
-    };
 
-    renderCart();
-    showView("cart");
-  });
-</script>
-{% endblock %}
+      document.getElementById("clearCartBtn").onclick = () => {
+        if (confirm("Clear all items from cart?")) saveCart([]);
+      };
+
+      proceedBtn.onclick = () => {
+        if (!getCart().length) return;
+        showView("checkout", 2);
+        renderSummary(
+          "checkoutItemsList",
+          "checkoutSubtotal",
+          "checkoutShipping",
+          "checkoutTotal",
+        );
+      };
+
+      document.getElementById("backToCartBtn").onclick = () => showView("cart");
+
+      document.getElementById("billingForm").onsubmit = (e) => {
+        e.preventDefault();
+        sessionStorage.setItem(
+          "me_billing",
+          JSON.stringify(Object.fromEntries(new FormData(e.target).entries())),
+        );
+        showView("payment", 3);
+        renderSummary(
+          "paymentItemsList",
+          "paymentSubtotal",
+          "paymentShipping",
+          "paymentTotal",
+        );
+      };
+
+      // Add this inside your DOMContentLoaded event listener, before the placeOrderBtn onclick
+
+      // Show/hide bank details based on payment method selection
+      const paymentRadios = document.querySelectorAll(
+        'input[name="paymentMethod"]',
+      );
+      const bankDetails = document.getElementById("bankDetails");
+
+      paymentRadios.forEach((radio) => {
+        radio.addEventListener("change", function () {
+          if (this.value === "bank") {
+            bankDetails.style.display = "block";
+          } else {
+            bankDetails.style.display = "none";
+          }
+        });
+      });
+
+      // Update the placeOrderBtn onclick to include payment method in the order data
+      document.getElementById("placeOrderBtn").onclick = async function () {
+        const billing = JSON.parse(
+          sessionStorage.getItem("me_billing") || "{}",
+        );
+        const paymentMethod =
+          document.querySelector('input[name="paymentMethod"]:checked')
+            ?.value || "cod";
+
+        this.disabled = true;
+        this.textContent = "Placing Order...";
+
+        // Get cart items
+        const cart = getCart();
+        const { subtotal, shipping, total } = calcTotals(cart);
+
+        // Prepare order data
+        const orderData = {
+          billing: billing,
+          payment_method: paymentMethod,
+          cart_items: cart,
+          subtotal: subtotal,
+          shipping: shipping,
+          total: total,
+        };
+
+        // If bank transfer, show bank details in confirmation or handle differently
+        if (paymentMethod === "bank") {
+          console.log("Bank transfer selected", orderData);
+          // You might want to show additional instructions here
+        }
+
+        // replace placeOrder() with your AJAX call to server
+        const result = { success: true, orderId: "#123456" }; // demo
+        if (result.success) {
+          document.getElementById("generatedOrderId").textContent =
+            result.orderId;
+          document.getElementById("confirmationModal").style.display = "";
+          saveCart([]);
+        } else {
+          alert("Error: " + result.error);
+          this.disabled = false;
+          this.textContent = "Place Order";
+        }
+      };
+
+      document.getElementById("backToDetailsBtn").onclick = () =>
+        showView("checkout", 2);
+
+      document.getElementById("placeOrderBtn").onclick = async function () {
+        const billing = JSON.parse(
+          sessionStorage.getItem("me_billing") || "{}",
+        );
+        this.disabled = true;
+        this.textContent = "Placing Order...";
+        const paymentMethod =
+          document.querySelector('input[name="paymentMethod"]:checked')
+            ?.value || "cod";
+        // replace placeOrder() with your AJAX call to server
+        const result = { success: true, orderId: "#123456" }; // demo
+        if (result.success) {
+          document.getElementById("generatedOrderId").textContent =
+            result.orderId;
+          document.getElementById("confirmationModal").style.display = "";
+          saveCart([]);
+        } else {
+          alert("Error: " + result.error);
+          this.disabled = false;
+          this.textContent = "Place Order";
+        }
+      };
+
+      renderCart();
+      showView("cart");
+    });
+  </script>
+  {% endblock %}
+</div>
