@@ -4,19 +4,63 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <title>{% block title %}Multan Electronics{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <title>{% block title %}Vision Electronics{% endblock %}</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{% static 'img/favicon.ico' %}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{% static 'img/favicon-32x32.png' %}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="{% static 'img/favicon-16x16.png' %}"
+    />
+
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="{% static 'img/apple-touch-icon.png' %}"
+    />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="{% static 'img/android-chrome-192x192.png' %}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="{% static 'img/android-chrome-512x512.png' %}"
+    />
     <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
     <link rel="stylesheet" href="{% static 'css/cart-extra.css' %}" />
     {% block extra_head %}{% endblock %}
   </head>
   <body>
-
     <!-- ===== TOP BAR ===== -->
     <div class="top-bar">
       <div class="container">
-        <span>SHOP TIMING 10:00AM TO 8:00 PM (FRIDAY OFF) CONTACT US +92-300123456</span>
+        <span
+          >SHOP TIMING 10:00AM TO 8:00 PM (FRIDAY OFF) CONTACT US
+          +92-300123456</span
+        >
         <div class="top-links">
           <a href="#">Promo Code</a>
           <a href="#">My Account</a>
@@ -40,7 +84,10 @@
 
           <div class="logo">
             <a href="{% url 'home' %}">
-              <img src="{% static 'img/logo.png' %}" alt="Multan Electronics" />
+              <img
+                src="{% static 'img/logo.png' %}?v=2"
+                alt="Vision Electronics"
+              />
             </a>
           </div>
 
@@ -51,9 +98,9 @@
 
           <div class="account cart-wrapper">
             {% if user.is_authenticated %}
-              <a href="{% url 'logout' %}" class="desktop-login">LOGOUT</a>
+            <a href="{% url 'logout' %}" class="desktop-login">LOGOUT</a>
             {% else %}
-              <a href="#" class="desktop-login" id="openAuthModal">LOGIN</a>
+            <a href="#" class="desktop-login" id="openAuthModal">LOGIN</a>
             {% endif %}
             <div class="vr"></div>
 
@@ -70,8 +117,12 @@
                     <strong id="miniCartTotal">Rs 0</strong>
                   </div>
                   <div class="cnt">
-                    <a href="{% url 'cart' %}"><button class="view-cart-btn">View Cart</button></a>
-                    <a href="{% url 'checkout' %}"><button class="check-out-btn">Checkout</button></a>
+                    <a href="{% url 'cart' %}"
+                      ><button class="view-cart-btn">View Cart</button></a
+                    >
+                    <a href="{% url 'checkout' %}"
+                      ><button class="check-out-btn">Checkout</button></a
+                    >
                   </div>
                 </div>
               </div>
@@ -90,7 +141,9 @@
               <a href="{% url 'all_products' %}?category=ender-3">Ender 3</a>
               <a href="{% url 'all_products' %}?category=prusa-i3">Prusa i3</a>
               <a href="{% url 'all_products' %}?category=anycubic">Anycubic</a>
-              <a href="{% url 'all_products' %}?category=resin-printers">Resin Printers</a>
+              <a href="{% url 'all_products' %}?category=resin-printers"
+                >Resin Printers</a
+              >
             </div>
           </li>
 
@@ -100,15 +153,37 @@
               <a href="{% url 'all_products' %}?category=arduino">Arduino</a>
               <a href="{% url 'all_products' %}?category=esp32">ESP32</a>
               <a href="{% url 'all_products' %}?category=esp8266">ESP8266</a>
-              <a href="{% url 'all_products' %}?category=raspberry-pi">Raspberry Pi</a>
+              <a href="{% url 'all_products' %}?category=raspberry-pi"
+                >Raspberry Pi</a
+              >
             </div>
           </li>
 
-          <li><a href="{% url 'all_products' %}?category=cnc-parts">CNC & 3D PRINTER PARTS</a></li>
-          <li><a href="{% url 'all_products' %}?category=incubators">INCUBATORS PARTS</a></li>
-          <li><a href="{% url 'all_products' %}?category=laser-modules">LASER MODULES</a></li>
-          <li><a href="{% url 'all_products' %}?category=quadcopter">QUADCOPTER & PARTS</a></li>
-          <li><a href="{% url 'all_products' %}?category=diy-projects">DIY PROJECTS</a></li>
+          <li>
+            <a href="{% url 'all_products' %}?category=cnc-parts"
+              >CNC & 3D PRINTER PARTS</a
+            >
+          </li>
+          <li>
+            <a href="{% url 'all_products' %}?category=incubators"
+              >INCUBATORS PARTS</a
+            >
+          </li>
+          <li>
+            <a href="{% url 'all_products' %}?category=laser-modules"
+              >LASER MODULES</a
+            >
+          </li>
+          <li>
+            <a href="{% url 'all_products' %}?category=quadcopter"
+              >QUADCOPTER & PARTS</a
+            >
+          </li>
+          <li>
+            <a href="{% url 'all_products' %}?category=diy-projects"
+              >DIY PROJECTS</a
+            >
+          </li>
         </ul>
       </nav>
     </div>
@@ -125,52 +200,112 @@
 
       <div class="mobile-nav-content">
         <div class="mobile-search-box">
-          <input type="text" id="mobileSearchInput" placeholder="Search products..." />
+          <input
+            type="text"
+            id="mobileSearchInput"
+            placeholder="Search products..."
+          />
           <button id="mobileSearchBtn"><i class="fas fa-search"></i></button>
         </div>
 
         <ul class="mobile-nav-menu">
           <li class="mobile-nav-item">
-            <a href="{% url 'all_products' %}" class="mobile-nav-link">ALL PRODUCTS</a>
+            <a href="{% url 'all_products' %}" class="mobile-nav-link"
+              >ALL PRODUCTS</a
+            >
           </li>
           <li class="mobile-nav-item">
             <a href="#" class="mobile-nav-link">3D PRINTERS</a>
             <button class="mobile-dropdown-toggle">›</button>
             <div class="mobile-dropdown">
-              <div class="mobile-dropdown-item"><a href="{% url 'all_products' %}?category=ender-3">Ender 3</a></div>
-              <div class="mobile-dropdown-item"><a href="{% url 'all_products' %}?category=prusa-i3">Prusa i3</a></div>
-              <div class="mobile-dropdown-item"><a href="{% url 'all_products' %}?category=anycubic">Anycubic</a></div>
-              <div class="mobile-dropdown-item"><a href="{% url 'all_products' %}?category=resin-printers">Resin Printers</a></div>
+              <div class="mobile-dropdown-item">
+                <a href="{% url 'all_products' %}?category=ender-3">Ender 3</a>
+              </div>
+              <div class="mobile-dropdown-item">
+                <a href="{% url 'all_products' %}?category=prusa-i3"
+                  >Prusa i3</a
+                >
+              </div>
+              <div class="mobile-dropdown-item">
+                <a href="{% url 'all_products' %}?category=anycubic"
+                  >Anycubic</a
+                >
+              </div>
+              <div class="mobile-dropdown-item">
+                <a href="{% url 'all_products' %}?category=resin-printers"
+                  >Resin Printers</a
+                >
+              </div>
             </div>
           </li>
           <li class="mobile-nav-item">
             <a href="#" class="mobile-nav-link">MICROCONTROLLERS & BOARDS</a>
             <button class="mobile-dropdown-toggle">›</button>
             <div class="mobile-dropdown">
-              <div class="mobile-dropdown-item"><a href="{% url 'all_products' %}?category=arduino">Arduino</a></div>
-              <div class="mobile-dropdown-item"><a href="{% url 'all_products' %}?category=esp32">ESP32</a></div>
-              <div class="mobile-dropdown-item"><a href="{% url 'all_products' %}?category=esp8266">ESP8266</a></div>
-              <div class="mobile-dropdown-item"><a href="{% url 'all_products' %}?category=raspberry-pi">Raspberry Pi</a></div>
+              <div class="mobile-dropdown-item">
+                <a href="{% url 'all_products' %}?category=arduino">Arduino</a>
+              </div>
+              <div class="mobile-dropdown-item">
+                <a href="{% url 'all_products' %}?category=esp32">ESP32</a>
+              </div>
+              <div class="mobile-dropdown-item">
+                <a href="{% url 'all_products' %}?category=esp8266">ESP8266</a>
+              </div>
+              <div class="mobile-dropdown-item">
+                <a href="{% url 'all_products' %}?category=raspberry-pi"
+                  >Raspberry Pi</a
+                >
+              </div>
             </div>
           </li>
-          <li class="mobile-nav-item"><a href="{% url 'all_products' %}?category=cnc-parts" class="mobile-nav-link">CNC & 3D PRINTER PARTS</a></li>
-          <li class="mobile-nav-item"><a href="{% url 'all_products' %}?category=incubators" class="mobile-nav-link">INCUBATORS PARTS</a></li>
-          <li class="mobile-nav-item"><a href="{% url 'all_products' %}?category=laser-modules" class="mobile-nav-link">LASER MODULES</a></li>
-          <li class="mobile-nav-item"><a href="{% url 'all_products' %}?category=quadcopter" class="mobile-nav-link">QUADCOPTER & PARTS</a></li>
-          <li class="mobile-nav-item"><a href="{% url 'all_products' %}?category=diy-projects" class="mobile-nav-link">DIY PROJECTS</a></li>
+          <li class="mobile-nav-item">
+            <a
+              href="{% url 'all_products' %}?category=cnc-parts"
+              class="mobile-nav-link"
+              >CNC & 3D PRINTER PARTS</a
+            >
+          </li>
+          <li class="mobile-nav-item">
+            <a
+              href="{% url 'all_products' %}?category=incubators"
+              class="mobile-nav-link"
+              >INCUBATORS PARTS</a
+            >
+          </li>
+          <li class="mobile-nav-item">
+            <a
+              href="{% url 'all_products' %}?category=laser-modules"
+              class="mobile-nav-link"
+              >LASER MODULES</a
+            >
+          </li>
+          <li class="mobile-nav-item">
+            <a
+              href="{% url 'all_products' %}?category=quadcopter"
+              class="mobile-nav-link"
+              >QUADCOPTER & PARTS</a
+            >
+          </li>
+          <li class="mobile-nav-item">
+            <a
+              href="{% url 'all_products' %}?category=diy-projects"
+              class="mobile-nav-link"
+              >DIY PROJECTS</a
+            >
+          </li>
         </ul>
 
         <div class="mobile-account-section">
           <h4>Account</h4>
           <div class="mobile-account-links">
             {% if user.is_authenticated %}
-              <a href="{% url 'logout' %}" class="mobile-account-link">
-                <i class="fas fa-sign-out-alt"></i> LOGOUT
-              </a>
+            <a href="{% url 'logout' %}" class="mobile-account-link">
+              <i class="fas fa-sign-out-alt"></i> LOGOUT
+            </a>
             {% else %}
-              <a href="#" class="mobile-account-link" id="mobileOpenAuth">
-                <i class="fas fa-user"></i> LOGIN
-              </a>
+            <a href="#" class="mobile-account-link" id="mobileOpenAuth">
+              <i class="fas fa-user"></i> LOGIN
+            </a>
             {% endif %}
             <a href="{% url 'wishlist' %}" class="mobile-account-link">
               <i class="fas fa-heart"></i> Wishlist
@@ -203,7 +338,9 @@
         <p class="footer-subtitle">CONTACT US</p>
         <div class="footer-content">
           <div class="footer-col">
-            <p>City Mall Near Zavia School System,<br />Gulgasht Colony, Multan</p>
+            <p>
+              City Mall Near Zavia School System,<br />Gulgasht Colony, Multan
+            </p>
           </div>
           <div class="footer-col">
             <p>info@multanelectronics.com</p>
@@ -211,7 +348,9 @@
           </div>
           <div class="footer-col">
             <a href="{% url 'all_products' %}">Shop</a>
-            <a href="{% url 'all_products' %}?category=diy-projects">DIY Projects</a>
+            <a href="{% url 'all_products' %}?category=diy-projects"
+              >DIY Projects</a
+            >
           </div>
           <div class="footer-col">
             <a href="#">About</a>
@@ -241,7 +380,7 @@
         <a href="#">About Us</a>
       </div>
       <div class="footer-copyright">
-        © 2026 Multan Electronics. All Rights Reserved.
+        © 2026 Vision Electronics. All Rights Reserved.
       </div>
     </div>
 
@@ -299,32 +438,45 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // ── Mobile Nav ──────────────────────────────────────────────
-        const mobileToggle  = document.querySelector(".mobile-nav-toggle");
-        const mobileClose   = document.querySelector(".mobile-close-btn");
-        const mobileNav     = document.querySelector(".mobile-nav-container");
+        const mobileToggle = document.querySelector(".mobile-nav-toggle");
+        const mobileClose = document.querySelector(".mobile-close-btn");
+        const mobileNav = document.querySelector(".mobile-nav-container");
         const mobileOverlay = document.querySelector(".mobile-nav-overlay");
-        const dropdownToggles = document.querySelectorAll(".mobile-dropdown-toggle");
+        const dropdownToggles = document.querySelectorAll(
+          ".mobile-dropdown-toggle",
+        );
 
         function toggleMobileMenu() {
           mobileNav.classList.toggle("active");
           mobileOverlay.classList.toggle("active");
-          document.body.style.overflow = mobileNav.classList.contains("active") ? "hidden" : "";
+          document.body.style.overflow = mobileNav.classList.contains("active")
+            ? "hidden"
+            : "";
         }
 
-        mobileToggle  && mobileToggle.addEventListener("click", toggleMobileMenu);
-        mobileClose   && mobileClose.addEventListener("click", toggleMobileMenu);
-        mobileOverlay && mobileOverlay.addEventListener("click", toggleMobileMenu);
+        mobileToggle &&
+          mobileToggle.addEventListener("click", toggleMobileMenu);
+        mobileClose && mobileClose.addEventListener("click", toggleMobileMenu);
+        mobileOverlay &&
+          mobileOverlay.addEventListener("click", toggleMobileMenu);
 
-        dropdownToggles.forEach(toggle => {
+        dropdownToggles.forEach((toggle) => {
           toggle.addEventListener("click", function () {
             const dropdown = this.nextElementSibling;
             dropdown.classList.toggle("active");
-            this.style.transform = dropdown.classList.contains("active") ? "rotate(90deg)" : "rotate(0deg)";
+            this.style.transform = dropdown.classList.contains("active")
+              ? "rotate(90deg)"
+              : "rotate(0deg)";
           });
         });
 
-        document.querySelectorAll(".mobile-nav-link, .mobile-account-link, .mobile-cart-link")
-          .forEach(link => link.addEventListener("click", () => toggleMobileMenu()));
+        document
+          .querySelectorAll(
+            ".mobile-nav-link, .mobile-account-link, .mobile-cart-link",
+          )
+          .forEach((link) =>
+            link.addEventListener("click", () => toggleMobileMenu()),
+          );
 
         // ── Mobile Search ────────────────────────────────────────────
         const mobileSearchBtn = document.getElementById("mobileSearchBtn");
@@ -332,35 +484,58 @@
         if (mobileSearchBtn) {
           mobileSearchBtn.addEventListener("click", function () {
             const q = mobileSearchInput.value.trim();
-            if (q) { window.location.href = "{% url 'all_products' %}?search=" + encodeURIComponent(q); }
+            if (q) {
+              window.location.href =
+                "{% url 'all_products' %}?search=" + encodeURIComponent(q);
+            }
           });
-          mobileSearchInput.addEventListener("keypress", e => { if (e.key === "Enter") mobileSearchBtn.click(); });
+          mobileSearchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") mobileSearchBtn.click();
+          });
         }
 
         // ── Header Search ────────────────────────────────────────────
-        const headerSearchBtn   = document.getElementById("headerSearchBtn");
+        const headerSearchBtn = document.getElementById("headerSearchBtn");
         const headerSearchInput = document.getElementById("headerSearch");
         if (headerSearchBtn) {
           headerSearchBtn.addEventListener("click", function () {
             const q = headerSearchInput.value.trim();
-            if (q) { window.location.href = "{% url 'all_products' %}?search=" + encodeURIComponent(q); }
+            if (q) {
+              window.location.href =
+                "{% url 'all_products' %}?search=" + encodeURIComponent(q);
+            }
           });
-          headerSearchInput.addEventListener("keypress", e => { if (e.key === "Enter") headerSearchBtn.click(); });
+          headerSearchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") headerSearchBtn.click();
+          });
         }
 
         // ── Auth Modal ───────────────────────────────────────────────
-        const authModal   = document.getElementById("authModal");
-        const openAuth    = document.getElementById("openAuthModal");
-        const mobileAuth  = document.getElementById("mobileOpenAuth");
-        const closeAuth   = document.getElementById("closeAuth");
-        const authOverlay = authModal && authModal.querySelector(".auth-overlay");
+        const authModal = document.getElementById("authModal");
+        const openAuth = document.getElementById("openAuthModal");
+        const mobileAuth = document.getElementById("mobileOpenAuth");
+        const closeAuth = document.getElementById("closeAuth");
+        const authOverlay =
+          authModal && authModal.querySelector(".auth-overlay");
 
-        function openAuthModal()  { authModal && authModal.classList.add("active"); }
-        function closeAuthModal() { authModal && authModal.classList.remove("active"); }
+        function openAuthModal() {
+          authModal && authModal.classList.add("active");
+        }
+        function closeAuthModal() {
+          authModal && authModal.classList.remove("active");
+        }
 
-        openAuth   && openAuth.addEventListener("click",   e => { e.preventDefault(); openAuthModal(); });
-        mobileAuth && mobileAuth.addEventListener("click", e => { e.preventDefault(); openAuthModal(); });
-        closeAuth  && closeAuth.addEventListener("click",  closeAuthModal);
+        openAuth &&
+          openAuth.addEventListener("click", (e) => {
+            e.preventDefault();
+            openAuthModal();
+          });
+        mobileAuth &&
+          mobileAuth.addEventListener("click", (e) => {
+            e.preventDefault();
+            openAuthModal();
+          });
+        closeAuth && closeAuth.addEventListener("click", closeAuthModal);
         authOverlay && authOverlay.addEventListener("click", closeAuthModal);
 
         // ── Back to Top ──────────────────────────────────────────────
@@ -369,14 +544,22 @@
           window.addEventListener("scroll", () => {
             backToTop.style.display = window.scrollY > 300 ? "block" : "none";
           });
-          backToTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+          backToTop.addEventListener("click", () =>
+            window.scrollTo({ top: 0, behavior: "smooth" }),
+          );
         }
       });
     </script>
 
     {% block extra_scripts %}{% endblock %}
 
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
   </body>
 </html>
