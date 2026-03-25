@@ -3,11 +3,6 @@
 
 {% block title %}{{ product.name }} – Vision Electronics{% endblock %}
 
-{% block extra_head %}
-  <script>
-    const PRODUCT_DATA = {{ product_json|safe }};
-  </script>
-{% endblock %}
 
 {% block content %}
 

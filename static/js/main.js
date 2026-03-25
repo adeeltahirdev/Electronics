@@ -148,6 +148,13 @@ function initAddToCartButtons() {
   document.addEventListener("click", e => {
     const btn = e.target.closest(".add-cart, .add-cart-btn");
     if (!btn) return;
+    
+    // Skip if this button is from product detail page (to avoid double addition)
+    // Product detail page buttons have data-from="product-detail" attribute
+    if (btn.dataset.from === "product-detail") {
+      return;
+    }
+    
     e.preventDefault();
 
     const { id, name, price, img } = btn.dataset;
