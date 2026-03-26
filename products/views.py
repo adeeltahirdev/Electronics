@@ -40,11 +40,20 @@ def all_products(request):
     if category:
         qs = qs.filter(categories__slug=category).distinct()
 
+    # Convert products to list of dicts
+    products_list = [_product_to_dict(p) for p in qs]
+    
+    # Debug: Print to console to verify data
+    print(f"Number of products: {len(products_list)}")
+    if products_list:
+        print(f"First product: {products_list[0]}")
+    
     products_json = json.dumps(
-        [_product_to_dict(p) for p in qs],
+        products_list,
         cls=DjangoJSONEncoder,
     )
 
+    # Use the correct template name with hyphen
     return render(request, "all-products.html", {
         "products":      qs,
         "products_json": products_json,

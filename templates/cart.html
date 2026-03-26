@@ -157,7 +157,6 @@ Electronics {% endblock %} {% block content %}
   </div>
 
   <!-- STEP 3: PAYMENT -->
-  <!-- STEP 3: PAYMENT -->
   <div class="payment-view" id="paymentView" style="display: none">
     <h2 class="cart-heading">Payment</h2>
 
@@ -241,160 +240,232 @@ Electronics {% endblock %} {% block content %}
       </div>
     </div>
   </div>
-  </div>
+</div>
 
-  {% endblock %} {% block extra_scripts %}
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      function getCart() {
-        return JSON.parse(localStorage.getItem("me_cart") || "[]");
-      }
+{% endblock %} {% block extra_scripts %}
+<!-- FIRST: Define the URL from Django -->
+<script>
+  // This will generate the correct URL based on your urls.py configuration
+  const PLACE_ORDER_URL = "{% url 'place_order' %}";
+  console.log("Place order URL from Django:", PLACE_ORDER_URL);
+</script>
 
-      function saveCart(cart) {
-        localStorage.setItem("me_cart", JSON.stringify(cart));
-        renderCart();
-      }
-
-      function fmt(n) {
-        return "Rs " + Number(n).toLocaleString("en-PK");
-      }
-
-      function calcTotals(cart) {
-        const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-        const shipping = subtotal > 0 ? 250 : 0;
-        return { subtotal, shipping, total: subtotal + shipping };
-      }
-
-      const views = {
-        cart: document.getElementById("cartView"),
-        checkout: document.getElementById("checkoutView"),
-        payment: document.getElementById("paymentView"),
-      };
-
-      const progress = document.getElementById("checkoutProgress");
-
-      function showView(name, step) {
-        Object.values(views).forEach((v) => (v.style.display = "none"));
-        views[name].style.display = "";
-        if (step) {
-          progress.style.display = "";
-          progress
-            .querySelectorAll(".step")
-            .forEach((s) =>
-              s.classList.toggle("active", parseInt(s.dataset.step) <= step),
-            );
-        } else {
-          progress.style.display = "none";
+<!-- SECOND: Main cart functionality -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Helper function to get CSRF token
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === name + "=") {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
         }
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      return cookieValue;
+    }
+
+    function getCart() {
+      return JSON.parse(localStorage.getItem("me_cart") || "[]");
+    }
+
+    function saveCart(cart) {
+      localStorage.setItem("me_cart", JSON.stringify(cart));
+      renderCart();
+      if (typeof updateCartCounter === "function") {
+        updateCartCounter();
+      }
+    }
+
+    // Add to cart function
+    function addToCart(product) {
+      const cart = getCart();
+      const existingItem = cart.find((item) => item.id === product.id);
+
+      if (existingItem) {
+        existingItem.qty += 1;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          price: parseFloat(product.price),
+          img: product.img || product.image || "",
+          qty: 1,
+        });
       }
 
-      const table = document.getElementById("cartTable");
-      const tbody = document.getElementById("cartTableBody");
-      const emptyMsg = document.getElementById("cartEmptyMsg");
-      const proceedBtn = document.getElementById("proceedCheckoutBtn");
-      const totalsSection = document.getElementById("cartTotalsSection");
+      saveCart(cart);
 
-      function renderCart() {
-        const cart = getCart();
-        const { subtotal, shipping, total } = calcTotals(cart);
+      // Show notification
+      const notification = document.createElement("div");
+      notification.textContent = `${product.name} added to cart!`;
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 5px;
+        z-index: 9999;
+        animation: fadeOut 2s ease-out;
+      `;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 2000);
+    }
 
-        if (!cart.length) {
-          emptyMsg.style.display = "block";
-          table.style.display = "none";
-          // Keep totalsSection visible but hide the table and show empty message
+    function fmt(n) {
+      return "Rs " + Number(n).toLocaleString("en-PK");
+    }
+
+    function calcTotals(cart) {
+      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+      const shipping = subtotal > 0 ? 250 : 0;
+      return { subtotal, shipping, total: subtotal + shipping };
+    }
+
+    const views = {
+      cart: document.getElementById("cartView"),
+      checkout: document.getElementById("checkoutView"),
+      payment: document.getElementById("paymentView"),
+    };
+
+    const progress = document.getElementById("checkoutProgress");
+
+    function showView(name, step) {
+      Object.values(views).forEach((v) => (v.style.display = "none"));
+      views[name].style.display = "";
+      if (step) {
+        progress.style.display = "";
+        progress
+          .querySelectorAll(".step")
+          .forEach((s) =>
+            s.classList.toggle("active", parseInt(s.dataset.step) <= step),
+          );
+      } else {
+        progress.style.display = "none";
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    const table = document.getElementById("cartTable");
+    const tbody = document.getElementById("cartTableBody");
+    const emptyMsg = document.getElementById("cartEmptyMsg");
+    const proceedBtn = document.getElementById("proceedCheckoutBtn");
+
+    function renderCart() {
+      const cart = getCart();
+      const { subtotal, shipping, total } = calcTotals(cart);
+
+      if (!cart.length) {
+        emptyMsg.style.display = "block";
+        table.style.display = "none";
+        if (document.querySelector(".cart-actions")) {
           document.querySelector(".cart-actions").style.display = "none";
-          document.getElementById("cartTable").style.display = "none";
-
-          document.getElementById("cartSubtotal").textContent = fmt(0);
-          document.getElementById("cartShipping").textContent = fmt(0);
-          document.getElementById("cartTotal").textContent = fmt(0);
-          proceedBtn.disabled = true;
-          return;
         }
+        document.getElementById("cartTable").style.display = "none";
 
-        emptyMsg.style.display = "none";
-        table.style.display = "table";
+        document.getElementById("cartSubtotal").textContent = fmt(0);
+        document.getElementById("cartShipping").textContent = fmt(0);
+        document.getElementById("cartTotal").textContent = fmt(0);
+        if (proceedBtn) proceedBtn.disabled = true;
+        return;
+      }
+
+      emptyMsg.style.display = "none";
+      table.style.display = "table";
+      if (document.querySelector(".cart-actions")) {
         document.querySelector(".cart-actions").style.display = "flex";
-        document.getElementById("cartTable").style.display = "table";
-        proceedBtn.disabled = false;
+      }
+      document.getElementById("cartTable").style.display = "table";
+      if (proceedBtn) proceedBtn.disabled = false;
 
-        tbody.innerHTML = cart
-          .map(
-            (item, i) => `
-    <tr>
-      <td class="cart-product-col">
-        <img src="${item.img || ""}" alt="${item.name}" />
-        <span>${item.name}</span>
-      </td>
-      <td>${fmt(item.price)}</td>
-      <td>
-        <div class="qty-wrapper">
-          <button class="qty-btn minus" data-index="${i}">-</button>
-          <span class="qty-value">${item.qty}</span>
-          <button class="qty-btn plus" data-index="${i}">+</button>
+      tbody.innerHTML = cart
+        .map(
+          (item, i) => `
+          <tr>
+            <td class="cart-product-col">
+              <img src="${item.img || ""}" alt="${item.name}" />
+              <span>${item.name}</span>
+            </td>
+            <td>${fmt(item.price)}</td>
+            <td>
+              <div class="qty-wrapper">
+                <button class="qty-btn minus" data-index="${i}">-</button>
+                <span class="qty-value">${item.qty}</span>
+                <button class="qty-btn plus" data-index="${i}">+</button>
+              </div>
+            </td>
+            <td>${fmt(item.price * item.qty)}</td>
+            <td>
+              <button class="remove-item-btn" data-index="${i}">✕</button>
+            </td>
+          </tr>
+        `,
+        )
+        .join("");
+
+      document.getElementById("cartSubtotal").textContent = fmt(subtotal);
+      document.getElementById("cartShipping").textContent = fmt(shipping);
+      document.getElementById("cartTotal").textContent = fmt(total);
+
+      tbody.querySelectorAll(".minus").forEach((btn) => {
+        btn.onclick = () => {
+          const c = getCart();
+          if (c[+btn.dataset.index].qty > 1) c[+btn.dataset.index].qty--;
+          saveCart(c);
+        };
+      });
+
+      tbody.querySelectorAll(".plus").forEach((btn) => {
+        btn.onclick = () => {
+          const c = getCart();
+          c[+btn.dataset.index].qty++;
+          saveCart(c);
+        };
+      });
+
+      tbody.querySelectorAll(".remove-item-btn").forEach((btn) => {
+        btn.onclick = () => {
+          const c = getCart();
+          c.splice(+btn.dataset.index, 1);
+          saveCart(c);
+        };
+      });
+    }
+
+    function renderSummary(listId, subtotalId, shippingId, totalId) {
+      const cart = getCart();
+      const { subtotal, shipping, total } = calcTotals(cart);
+      document.getElementById(listId).innerHTML = cart
+        .map(
+          (i) => `
+        <div class="order-item">
+          <span>${i.name} × ${i.qty}</span>
+          <span>${fmt(i.price * i.qty)}</span>
         </div>
-      </td>
-      <td>${fmt(item.price * item.qty)}</td>
-      <td>
-        <button class="remove-item-btn" data-index="${i}">✕</button>
-      </td>
-    </tr>
-  `,
-          )
-          .join("");
+      `,
+        )
+        .join("");
+      document.getElementById(subtotalId).textContent = fmt(subtotal);
+      document.getElementById(shippingId).textContent = fmt(shipping);
+      document.getElementById(totalId).textContent = fmt(total);
+    }
 
-        document.getElementById("cartSubtotal").textContent = fmt(subtotal);
-        document.getElementById("cartShipping").textContent = fmt(shipping);
-        document.getElementById("cartTotal").textContent = fmt(total);
-
-        tbody.querySelectorAll(".minus").forEach((btn) => {
-          btn.onclick = () => {
-            const c = getCart();
-            if (c[+btn.dataset.index].qty > 1) c[+btn.dataset.index].qty--;
-            saveCart(c);
-          };
-        });
-
-        tbody.querySelectorAll(".plus").forEach((btn) => {
-          btn.onclick = () => {
-            const c = getCart();
-            c[+btn.dataset.index].qty++;
-            saveCart(c);
-          };
-        });
-
-        tbody.querySelectorAll(".remove-item-btn").forEach((btn) => {
-          btn.onclick = () => {
-            const c = getCart();
-            c.splice(+btn.dataset.index, 1);
-            saveCart(c);
-          };
-        });
-      }
-
-      function renderSummary(listId, subtotalId, shippingId, totalId) {
-        const cart = getCart();
-        const { subtotal, shipping, total } = calcTotals(cart);
-        document.getElementById(listId).innerHTML = cart
-          .map(
-            (i) => `
-      <div class="order-item">
-        <span>${i.name} × ${i.qty}</span>
-        <span>${fmt(i.price * i.qty)}</span>
-      </div>
-    `,
-          )
-          .join("");
-        document.getElementById(subtotalId).textContent = fmt(subtotal);
-        document.getElementById(shippingId).textContent = fmt(shipping);
-        document.getElementById(totalId).textContent = fmt(total);
-      }
-
-      document.getElementById("clearCartBtn").onclick = () => {
+    // Clear Cart Button
+    const clearCartBtn = document.getElementById("clearCartBtn");
+    if (clearCartBtn) {
+      clearCartBtn.onclick = () => {
         if (confirm("Clear all items from cart?")) saveCart([]);
       };
+    }
 
+    // Proceed to Checkout
+    if (proceedBtn) {
       proceedBtn.onclick = () => {
         if (!getCart().length) return;
         showView("checkout", 2);
@@ -405,15 +476,25 @@ Electronics {% endblock %} {% block content %}
           "checkoutTotal",
         );
       };
+    }
 
-      document.getElementById("backToCartBtn").onclick = () => showView("cart");
+    // Back to Cart
+    const backToCartBtn = document.getElementById("backToCartBtn");
+    if (backToCartBtn) {
+      backToCartBtn.onclick = () => showView("cart");
+    }
 
-      document.getElementById("billingForm").onsubmit = (e) => {
+    // Billing Form Submit
+    const billingForm = document.getElementById("billingForm");
+    if (billingForm) {
+      billingForm.onsubmit = (e) => {
         e.preventDefault();
-        sessionStorage.setItem(
-          "me_billing",
-          JSON.stringify(Object.fromEntries(new FormData(e.target).entries())),
-        );
+        const formData = new FormData(e.target);
+        const billingData = {};
+        for (let [key, value] of formData.entries()) {
+          billingData[key] = value;
+        }
+        sessionStorage.setItem("me_billing", JSON.stringify(billingData));
         showView("payment", 3);
         renderSummary(
           "paymentItemsList",
@@ -422,99 +503,176 @@ Electronics {% endblock %} {% block content %}
           "paymentTotal",
         );
       };
+    }
 
-      // Add this inside your DOMContentLoaded event listener, before the placeOrderBtn onclick
+    // Show/hide bank details based on payment method selection
+    const paymentRadios = document.querySelectorAll(
+      'input[name="paymentMethod"]',
+    );
+    const bankDetails = document.getElementById("bankDetails");
 
-      // Show/hide bank details based on payment method selection
-      const paymentRadios = document.querySelectorAll(
-        'input[name="paymentMethod"]',
-      );
-      const bankDetails = document.getElementById("bankDetails");
-
-      paymentRadios.forEach((radio) => {
-        radio.addEventListener("change", function () {
-          if (this.value === "bank") {
-            bankDetails.style.display = "block";
-          } else {
-            bankDetails.style.display = "none";
-          }
-        });
+    paymentRadios.forEach((radio) => {
+      radio.addEventListener("change", function () {
+        if (this.value === "bank") {
+          bankDetails.style.display = "block";
+        } else {
+          bankDetails.style.display = "none";
+        }
       });
+    });
 
-      // Update the placeOrderBtn onclick to include payment method in the order data
-      document.getElementById("placeOrderBtn").onclick = async function () {
+    // Back to Details
+    const backToDetailsBtn = document.getElementById("backToDetailsBtn");
+    if (backToDetailsBtn) {
+      backToDetailsBtn.onclick = () => showView("checkout", 2);
+    }
+
+    // PLACE ORDER BUTTON - WITH CORRECT URL
+    const placeOrderBtn = document.getElementById("placeOrderBtn");
+    if (placeOrderBtn) {
+      placeOrderBtn.onclick = async function () {
         const billing = JSON.parse(
           sessionStorage.getItem("me_billing") || "{}",
         );
         const paymentMethod =
           document.querySelector('input[name="paymentMethod"]:checked')
             ?.value || "cod";
-
-        this.disabled = true;
-        this.textContent = "Placing Order...";
-
-        // Get cart items
         const cart = getCart();
-        const { subtotal, shipping, total } = calcTotals(cart);
+
+        // Log for debugging
+        console.log("Cart items:", cart);
+        console.log("Billing data:", billing);
+
+        if (!cart.length) {
+          alert("Your cart is empty!");
+          return;
+        }
+
+        // Validate required billing fields
+        const requiredFields = [
+          "first_name",
+          "last_name",
+          "phone",
+          "address",
+          "city",
+        ];
+        const missingFields = requiredFields.filter((field) => !billing[field]);
+
+        if (missingFields.length) {
+          alert(
+            `Please fill in all required fields: ${missingFields.join(", ")}`,
+          );
+          showView("checkout", 2);
+          return;
+        }
+
+        // Check if cart items have IDs
+        const itemsWithoutIds = cart.filter((item) => !item.id);
+        if (itemsWithoutIds.length > 0) {
+          console.error("Items missing IDs:", itemsWithoutIds);
+          alert(
+            "Error: Some products don't have valid IDs. Please remove them from cart and add again.",
+          );
+          return;
+        }
+
+        // Prepare items array
+        const items = cart.map((item) => ({
+          id: parseInt(item.id),
+          qty: parseInt(item.qty),
+        }));
 
         // Prepare order data
         const orderData = {
-          billing: billing,
+          items: items,
+          billing: {
+            first_name: billing.first_name || "",
+            last_name: billing.last_name || "",
+            phone: billing.phone || "",
+            email: billing.email || "",
+            address: billing.address || "",
+            city: billing.city || "",
+            province: billing.province || "",
+            notes: billing.notes || "",
+          },
           payment_method: paymentMethod,
-          cart_items: cart,
-          subtotal: subtotal,
-          shipping: shipping,
-          total: total,
         };
 
-        // If bank transfer, show bank details in confirmation or handle differently
-        if (paymentMethod === "bank") {
-          console.log("Bank transfer selected", orderData);
-          // You might want to show additional instructions here
-        }
+        console.log("Sending order data:", orderData);
+        console.log("Using URL:", PLACE_ORDER_URL);
 
-        // replace placeOrder() with your AJAX call to server
-        const result = { success: true, orderId: "#123456" }; // demo
-        if (result.success) {
-          document.getElementById("generatedOrderId").textContent =
-            result.orderId;
-          document.getElementById("confirmationModal").style.display = "";
-          saveCart([]);
-        } else {
-          alert("Error: " + result.error);
-          this.disabled = false;
-          this.textContent = "Place Order";
-        }
-      };
-
-      document.getElementById("backToDetailsBtn").onclick = () =>
-        showView("checkout", 2);
-
-      document.getElementById("placeOrderBtn").onclick = async function () {
-        const billing = JSON.parse(
-          sessionStorage.getItem("me_billing") || "{}",
-        );
+        // Disable button
         this.disabled = true;
         this.textContent = "Placing Order...";
-        const paymentMethod =
-          document.querySelector('input[name="paymentMethod"]:checked')
-            ?.value || "cod";
-        // replace placeOrder() with your AJAX call to server
-        const result = { success: true, orderId: "#123456" }; // demo
-        if (result.success) {
-          document.getElementById("generatedOrderId").textContent =
-            result.orderId;
-          document.getElementById("confirmationModal").style.display = "";
-          saveCart([]);
-        } else {
-          alert("Error: " + result.error);
+
+        try {
+          const csrftoken = getCookie("csrftoken");
+
+          // Use the Django-generated URL
+          const response = await fetch(PLACE_ORDER_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify(orderData),
+          });
+
+          console.log("Response status:", response.status);
+
+          // Try to parse response as JSON
+          let result;
+          try {
+            result = await response.json();
+            console.log("Response data:", result);
+          } catch (e) {
+            console.error("Failed to parse response:", e);
+            const text = await response.text();
+            console.error("Raw response:", text);
+            throw new Error(
+              `Server returned invalid response: ${text.substring(0, 200)}`,
+            );
+          }
+
+          if (result.success) {
+            // Order placed successfully
+            document.getElementById("generatedOrderId").textContent =
+              result.order_id;
+            document.getElementById("confirmationModal").style.display = "flex";
+
+            // Clear cart and billing data
+            saveCart([]);
+            sessionStorage.removeItem("me_billing");
+
+            // Show success message
+            console.log("Order placed successfully:", result.order_id);
+          } else {
+            // Handle error from server
+            const errorMsg = result.error || "Unknown error occurred";
+            console.error("Server error:", errorMsg);
+            alert(
+              `Failed to place order:\n\n${errorMsg}\n\nPlease check the console for details.`,
+            );
+          }
+        } catch (error) {
+          console.error("Error placing order:", error);
+          alert(
+            `Network error: Could not place order.\n\nError: ${error.message}\n\nPlease check your connection and try again.`,
+          );
+        } finally {
+          // Re-enable button
           this.disabled = false;
           this.textContent = "Place Order";
         }
       };
+    }
 
-      renderCart();
-      showView("cart");
-    });
-  </script>
-  {% endblock %}
+    // Initialize cart view
+    renderCart();
+    showView("cart");
+
+    // Make addToCart function globally available for onclick handlers
+    window.addToCart = addToCart;
+  });
+</script>
+{% endblock %}

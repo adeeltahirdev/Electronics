@@ -3,6 +3,12 @@
 
 {% block title %}{{ product.name }} – Vision Electronics{% endblock %}
 
+{% block extra_head %}
+<script>
+  const PRODUCT_DATA = {{ product_json|safe }};
+  console.log("PRODUCT_DATA loaded:", PRODUCT_DATA);
+</script>
+{% endblock %}
 
 {% block content %}
 
@@ -65,7 +71,7 @@
   <div class="product-tabs container">
     <div class="tabs-header">
       <button class="active" id="descTabBtn">DESCRIPTION</button>
-      <button id="reviewTabBtn">REVIEWS (0)</button>
+      <!-- <button id="reviewTabBtn">REVIEWS (0)</button> -->
     </div>
     <div class="tab-content" id="tabContent">
       <div id="descPanel">
@@ -83,62 +89,190 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const p = PRODUCT_DATA;
+    console.log("Product detail page loaded with product:", p);
 
     // ── Gallery thumbnails ──────────────────────────────────────────
     const thumbsContainer = document.getElementById("galleryThumbs");
     const mainImg = document.getElementById("mainImage");
     const allImages = p.gallery && p.gallery.length ? p.gallery : (p.img ? [p.img] : []);
 
-    allImages.forEach((src, i) => {
-      const thumb = document.createElement("img");
-      thumb.src = src;
-      thumb.alt = "Thumbnail " + (i + 1);
-      thumb.className = i === 0 ? "active-thumb" : "";
-      thumb.addEventListener("click", () => {
-        mainImg.src = src;
-        thumbsContainer.querySelectorAll("img").forEach(t => t.classList.remove("active-thumb"));
-        thumb.classList.add("active-thumb");
+    if (thumbsContainer && allImages.length > 0) {
+      allImages.forEach((src, i) => {
+        const thumb = document.createElement("img");
+        thumb.src = src;
+        thumb.alt = "Thumbnail " + (i + 1);
+        thumb.className = i === 0 ? "active-thumb" : "";
+        thumb.addEventListener("click", () => {
+          mainImg.src = src;
+          thumbsContainer.querySelectorAll("img").forEach(t => t.classList.remove("active-thumb"));
+          thumb.classList.add("active-thumb");
+        });
+        thumbsContainer.appendChild(thumb);
       });
-      thumbsContainer.appendChild(thumb);
-    });
-    if (allImages[0]) mainImg.src = allImages[0];
+      if (allImages[0]) mainImg.src = allImages[0];
+    }
 
     // ── Product notes ───────────────────────────────────────────────
     const notesList = document.getElementById("productNotes");
-    if (p.notes && p.notes.length) {
-      notesList.innerHTML = p.notes.map(n => `<li>${n.trim()}</li>`).join("");
+    if (notesList && p.notes && p.notes.length) {
+      notesList.innerHTML = p.notes.map(n => `<li>${escapeHtml(n.trim())}</li>`).join("");
     }
 
     // ── Quantity controls ───────────────────────────────────────────
     const qtyDisplay = document.querySelector(".qty-value");
     let qty = 1;
-    document.querySelector(".qty-btn.minus").addEventListener("click", () => {
-      if (qty > 1) { qty--; qtyDisplay.textContent = qty; }
-    });
-    document.querySelector(".qty-btn.plus").addEventListener("click", () => {
-      qty++;
-      qtyDisplay.textContent = qty;
-    });
+    const minusBtn = document.querySelector(".qty-btn.minus");
+    const plusBtn = document.querySelector(".qty-btn.plus");
+    
+    if (minusBtn) {
+      minusBtn.addEventListener("click", () => {
+        if (qty > 1) { 
+          qty--; 
+          qtyDisplay.textContent = qty; 
+        }
+      });
+    }
+    
+    if (plusBtn) {
+      plusBtn.addEventListener("click", () => {
+        qty++;
+        qtyDisplay.textContent = qty;
+      });
+    }
 
-    // ── Add to Cart ─────────────────────────────────────────────────
-    const addToCartBtn = document.getElementById("addToCartBtn");
-    addToCartBtn && addToCartBtn.addEventListener("click", function () {
-      const cartItem = {
-        id:    this.dataset.id,
-        name:  this.dataset.name,
-        price: parseFloat(this.dataset.price),
-        img:   this.dataset.img,
-        qty:   qty,
+    // ── Add to Cart Function (direct localStorage, no duplication) ──
+    function addToCart() {
+      const product = {
+        id: parseInt(document.getElementById("addToCartBtn").dataset.id),
+        name: document.getElementById("addToCartBtn").dataset.name,
+        price: parseFloat(document.getElementById("addToCartBtn").dataset.price),
+        img: document.getElementById("addToCartBtn").dataset.img,
+        qty: qty
       };
-      // Dispatch a custom event that main.js cart module listens to
-      document.dispatchEvent(new CustomEvent("addToCart", { detail: cartItem }));
-    });
+      
+      console.log("Adding to cart - quantity:", qty);
+      console.log("Product:", product);
+      
+      // Get current cart
+      let cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
+      
+      // Check if product already exists
+      const existingItem = cart.find(item => item.id === product.id);
+      
+      if (existingItem) {
+        // Update existing item quantity
+        existingItem.qty += product.qty;
+        console.log(`Updated existing item: ${product.name} new quantity: ${existingItem.qty}`);
+      } else {
+        // Add new item
+        cart.push(product);
+        console.log(`Added new item: ${product.name}`);
+      }
+      
+      // Save back to localStorage
+      localStorage.setItem("me_cart", JSON.stringify(cart));
+      
+      // Update cart counter
+      updateCartCounter();
+      
+      // Show notification
+      showNotification(`${product.name} added to cart! (${product.qty} item${product.qty > 1 ? 's' : ''})`);
+    }
+    
+    // Helper function to escape HTML
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+    
+    // Show notification function
+    function showNotification(message) {
+      // Remove existing notification if any
+      const existing = document.querySelector('.custom-notification');
+      if (existing) existing.remove();
+      
+      const notification = document.createElement('div');
+      notification.className = 'custom-notification';
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 5px;
+        z-index: 10000;
+        font-size: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
+    }
+    
+    // Update cart counter function (use global if exists, otherwise local)
+    function updateCartCounter() {
+      const cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
+      const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+      const cartCounter = document.getElementById("cartCount");
+      const mobileCartCount = document.getElementById("mobileCartCount");
+      
+      if (cartCounter) {
+        cartCounter.textContent = totalItems;
+        cartCounter.style.display = totalItems > 0 ? "inline-block" : "none";
+      }
+      
+      if (mobileCartCount) {
+        mobileCartCount.textContent = totalItems;
+        mobileCartCount.style.display = totalItems > 0 ? "inline-block" : "none";
+      }
+      
+      // Also try to update mini cart if function exists
+      if (typeof window.updateMiniCart === 'function') {
+        window.updateMiniCart();
+      }
+      
+      return totalItems;
+    }
+    
+    // ── Add to Cart Button Click (prevent multiple listeners) ───────
+    const addToCartBtn = document.getElementById("addToCartBtn");
+    if (addToCartBtn) {
+      // Remove any existing listeners to prevent duplication
+      const newBtn = addToCartBtn.cloneNode(true);
+      addToCartBtn.parentNode.replaceChild(newBtn, addToCartBtn);
+      
+      newBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        addToCart();
+      });
+    }
 
     // ── Buy Now ─────────────────────────────────────────────────────
-    document.getElementById("buyNowBtn").addEventListener("click", function () {
-      addToCartBtn.click();
-      window.location.href = "{% url 'checkout' %}";
-    });
+    const buyNowBtn = document.getElementById("buyNowBtn");
+    if (buyNowBtn) {
+      const newBuyBtn = buyNowBtn.cloneNode(true);
+      buyNowBtn.parentNode.replaceChild(newBuyBtn, buyNowBtn);
+      
+      newBuyBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        addToCart();
+        setTimeout(() => {
+          window.location.href = "{% url 'checkout' %}";
+        }, 200);
+      });
+    }
 
     // ── Description / Reviews tabs ──────────────────────────────────
     const descBtn    = document.getElementById("descTabBtn");
@@ -146,18 +280,78 @@
     const descPanel  = document.getElementById("descPanel");
     const reviewPanel = document.getElementById("reviewPanel");
 
-    descBtn.addEventListener("click", () => {
-      descBtn.classList.add("active");
-      reviewBtn.classList.remove("active");
-      descPanel.style.display  = "";
-      reviewPanel.style.display = "none";
-    });
-    reviewBtn.addEventListener("click", () => {
-      reviewBtn.classList.add("active");
-      descBtn.classList.remove("active");
-      reviewPanel.style.display = "";
-      descPanel.style.display  = "none";
+    if (descBtn && reviewBtn) {
+      descBtn.addEventListener("click", () => {
+        descBtn.classList.add("active");
+        reviewBtn.classList.remove("active");
+        descPanel.style.display  = "";
+        reviewPanel.style.display = "none";
+      });
+      reviewBtn.addEventListener("click", () => {
+        reviewBtn.classList.add("active");
+        descBtn.classList.remove("active");
+        reviewPanel.style.display = "";
+        descPanel.style.display  = "none";
+      });
+    }
+    
+    // Initialize cart counter on page load
+    updateCartCounter();
+    
+    // Listen for cart updates from other pages
+    window.addEventListener('cartUpdated', function(e) {
+      updateCartCounter();
     });
   });
 </script>
+
+<style>
+  @keyframes fadeOut {
+    0% { opacity: 0; transform: translateY(-20px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-20px); }
+  }
+  
+  .custom-notification {
+    animation: fadeOut 2s ease-out;
+  }
+  
+  .gallery-thumbs {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .gallery-thumbs img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 4px;
+  }
+  
+  .gallery-thumbs img.active-thumb {
+    border-color: #ff6600;
+  }
+  
+  .gallery-main img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+  }
+  
+  .product-notes {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+  }
+  
+  .product-notes li {
+    padding: 5px 0;
+    color: #666;
+  }
+  
+</style>
 {% endblock %}

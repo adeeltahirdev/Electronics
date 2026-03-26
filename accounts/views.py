@@ -1,23 +1,24 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, logout
+from django.contrib.auth.models import auth
 from django.contrib import messages
 from .models import User
 
 
 def login_view(request):
-    if request.user.is_authenticated:
-        return redirect("home")
-
-    if request.method == "POST":
-        username = request.POST.get("username", "").strip()
-        password = request.POST.get("password", "")
-        user = authenticate(request, username=username, password=password)
-        if user:
-            login(request, user)
-            return redirect(request.POST.get("next") or request.GET.get("next") or "home")
-        messages.error(request, "Invalid username or password.")
-
-    return render(request, "login.html", {"next": request.GET.get("next", "")})
+    if request.method == 'POST':    
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        user = auth.authenticate(username=username, password=password)
+    
+        if user is not None:
+            auth.login(request, user)
+            return redirect('/')
+        else:
+            messages.error(request, 'Invalid credentials')
+            return redirect('/')
+    return render(request, 'index.html')
 
 
 def register(request):
@@ -38,9 +39,9 @@ def register(request):
         else:
             User.objects.create_user(username=username, email=email, password=password)
             messages.success(request, "Account created! You can now log in.")
-            return redirect("login")
+            return redirect("index")
 
-    return render(request, "register.html")
+    return render(request, "index.html")
 
 
 def logout_view(request):

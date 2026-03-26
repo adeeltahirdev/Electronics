@@ -4,9 +4,11 @@
 {% block title %}All Products – Vision Electronics{% endblock %}
 
 {% block extra_head %}
-  {# Pass Django data to JavaScript safely #}
+  <!-- Pass Django data to JavaScript safely -->
   <script>
     const PRODUCTS_DATA = {{ products_json|safe }};
+    console.log("PRODUCTS_DATA loaded from Django:", PRODUCTS_DATA);
+    console.log("Number of products:", PRODUCTS_DATA ? PRODUCTS_DATA.length : 0);
   </script>
 {% endblock %}
 
@@ -38,8 +40,72 @@
 
 {% block extra_scripts %}
 <script>
+  // Function to update cart counter
+  function updateCartCounter() {
+    const cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
+    const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+    const cartCounter = document.getElementById("cartCount");
+    if (cartCounter) {
+      cartCounter.textContent = totalItems;
+      // Show/hide counter based on value
+      if (totalItems > 0) {
+        cartCounter.style.display = "inline-block";
+      } else {
+        cartCounter.style.display = "none";
+      }
+    }
+    return totalItems;
+  }
+
+  // Show temporary notification
+  function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4CAF50;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 5px;
+      z-index: 9999;
+      animation: fadeOut 2s ease-out;
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      setTimeout(() => notification.remove(), 300);
+    }, 2000);
+  }
+
   // ── All Products: sorting, filtering, pagination ──────────────────────────
   document.addEventListener("DOMContentLoaded", function () {
+    // Update cart counter on page load
+    updateCartCounter();
+    
+    // Check if PRODUCTS_DATA exists
+    if (typeof PRODUCTS_DATA === 'undefined') {
+      console.error("PRODUCTS_DATA is not defined! Check if products_json is being passed from Django.");
+      const grid = document.getElementById("productsGrid");
+      if (grid) {
+        grid.innerHTML = '<p class="no-products">Error loading products. Please refresh the page.</p>';
+      }
+      return;
+    }
+    
+    if (!PRODUCTS_DATA || PRODUCTS_DATA.length === 0) {
+      console.warn("PRODUCTS_DATA is empty!");
+      const grid = document.getElementById("productsGrid");
+      if (grid) {
+        grid.innerHTML = '<p class="no-products">No products found.</p>';
+      }
+      return;
+    }
+    
+    console.log("PRODUCTS_DATA loaded:", PRODUCTS_DATA.length, "products");
+    console.log("First product sample:", PRODUCTS_DATA[0]);
+    
     const PRODUCTS_PER_PAGE = 16;
     let currentPage = 1;
     let filteredProducts = [...PRODUCTS_DATA];
@@ -53,11 +119,13 @@
       filteredProducts = filteredProducts.filter(p =>
         p.name.toLowerCase().includes(searchQ)
       );
+      console.log("Filtered by search:", searchQ, "->", filteredProducts.length, "products");
     }
     if (catSlug) {
       filteredProducts = filteredProducts.filter(p =>
         p.categories && p.categories.some(c => c.toLowerCase().replace(/\s+/g, "-") === catSlug)
       );
+      console.log("Filtered by category:", catSlug, "->", filteredProducts.length, "products");
     }
 
     function sortProducts(arr, mode) {
@@ -84,24 +152,68 @@
       grid.innerHTML = slice.map(p => `
         <div class="product-card"
              data-id="${p.id}"
-             data-name="${p.name}"
+             data-name="${escapeHtml(p.name)}"
              data-price="${p.price}"
              data-img="${p.img}">
           <a href="${p.url}">
             <ion-icon name="heart-circle-outline" class="wishlist-btn"></ion-icon>
-            <img src="${p.img || '/static/img/placeholder.webp'}" alt="${p.name}" loading="lazy" />
-            <h3>${p.name}</h3>
+            <img src="${p.img || '/static/img/placeholder.webp'}" alt="${escapeHtml(p.name)}" loading="lazy" />
+            <h3>${escapeHtml(p.name)}</h3>
             <p class="price">Rs ${Number(p.price).toLocaleString("en-PK")}</p>
           </a>
-          <button class="add-cart"
+          <button class="add-cart-btn"
                   data-id="${p.id}"
-                  data-name="${p.name}"
+                  data-name="${escapeHtml(p.name)}"
                   data-price="${p.price}"
-                  data-img="${p.img}">
+                  data-img="${p.img || '/static/img/placeholder.webp'}">
             Add to Cart
           </button>
         </div>
       `).join("");
+      
+      // Attach event listeners to "Add to Cart" buttons
+      document.querySelectorAll('.add-cart-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const product = {
+            id: parseInt(this.dataset.id),
+            name: this.dataset.name,
+            price: parseFloat(this.dataset.price),
+            img: this.dataset.img
+          };
+          
+          console.log("Add to cart clicked:", product);
+          
+          // Store in localStorage directly
+          let cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
+          const existingItem = cart.find(item => item.id === product.id);
+          if (existingItem) {
+            existingItem.qty += 1;
+          } else {
+            cart.push({...product, qty: 1});
+          }
+          localStorage.setItem("me_cart", JSON.stringify(cart));
+          
+          // Update cart counter immediately
+          updateCartCounter();
+          
+          // Show notification
+          showNotification(`${product.name} added to cart!`);
+        });
+      });
+    }
+    
+    // Helper function to escape HTML
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     function renderPagination(products, page) {
@@ -133,11 +245,14 @@
     }
 
     // Sort dropdown
-    document.getElementById("sortBy").addEventListener("change", function () {
-      filteredProducts = sortProducts(filteredProducts, this.value);
-      currentPage = 1;
-      refresh();
-    });
+    const sortSelect = document.getElementById("sortBy");
+    if (sortSelect) {
+      sortSelect.addEventListener("change", function () {
+        filteredProducts = sortProducts(filteredProducts, this.value);
+        currentPage = 1;
+        refresh();
+      });
+    }
 
     // Initial render
     refresh();
