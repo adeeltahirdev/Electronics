@@ -39,7 +39,7 @@ def register(request):
         else:
             User.objects.create_user(username=username, email=email, password=password)
             messages.success(request, "Account created! You can now log in.")
-            return redirect("index")
+            return redirect("home")
 
     return render(request, "index.html")
 
