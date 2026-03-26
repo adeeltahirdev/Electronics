@@ -11,4 +11,5 @@ urlpatterns = [
     path("orders/",   include("orders.urls")),
     path("accounts/", include("accounts.urls")),
     path("wishlist/", include("wishlist.urls")),
+    path("dashboard/", include("dashboard.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

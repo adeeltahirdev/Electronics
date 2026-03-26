@@ -1,0 +1,123 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block dashboard_title %}Order Details #{{ order.id }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="card">
+    <div class="card-header">
+        <h3>Order #{{ order.id }}</h3>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="order-details">
+                <h4>Order Information</h4>
+                <p><strong>Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
+                <p><strong>Customer:</strong> {{ order.billing_name }}</p>
+                <p><strong>Phone:</strong> {{ order.billing_phone }}</p>
+                <p><strong>Email:</strong> {{ order.billing_email|default:"-" }}</p>
+                <p><strong>Address:</strong> {{ order.billing_address }}, {{ order.billing_city }}</p>
+                <p><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
+                <p><strong>Payment Status:</strong> {{ order.get_payment_status_display }}</p>
+                <p><strong>Transaction ID:</strong> {{ order.transaction_id|default:"-" }}</p>
+                <p><strong>Order Status:</strong>
+                    <select name="status" style="padding: 5px 10px; margin-left: 10px;">
+                        {% for status_value, status_label in order.ORDER_STATUS %}
+                        <option value="{{ status_value }}" {% if order.status == status_value %}selected{% endif %}>
+                            {{ status_label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm" style="margin-left: 10px;">Update Status</button>
+                </p>
+                
+                <h4 style="margin-top: 30px;">Order Items</h4>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>Rs {{ item.price|floatformat:0 }}</td>
+                            <td>Rs {{ item.get_total|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" style="text-align: right;"><strong>Subtotal:</strong></td>
+                            <td>Rs {{ order.total_price|add:-250|floatformat:0 }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="text-align: right;"><strong>Shipping:</strong></td>
+                            <td>Rs 250</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
+                            <td><strong>Rs {{ order.total_price|floatformat:0 }}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                
+                {% if order.notes %}
+                <h4>Order Notes</h4>
+                <p>{{ order.notes }}</p>
+                {% endif %}
+            </div>
+        </form>
+        <div class="form-actions" style="margin-top: 20px;">
+            <a href="{% url 'dashboard_orders' %}" class="btn btn-secondary">Back to Orders</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.order-details p {
+    margin: 10px 0;
+}
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+.data-table th,
+.data-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+.data-table th {
+    background: #f9f9f9;
+    font-weight: 600;
+}
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-primary {
+    background: #ff6600;
+    color: white;
+}
+.btn-secondary {
+    background: #666;
+    color: white;
+}
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+</style>
+{% endblock %}

@@ -4,6 +4,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
@@ -59,9 +64,12 @@
       <div class="container">
         <span
           >SHOP TIMING 10:00AM TO 8:00 PM (FRIDAY OFF) CONTACT US
-          +92-300123456</span
+          +92-308-0058600</span
         >
         <div class="top-links">
+          {% if user.is_staff %}
+          <a href="{% url 'dashboard_home' %}">Admin Dashboard</a>
+          {% endif %}
           <a href="#">Promo Code</a>
           <a href="#">My Account</a>
           <a href="#">Track Your Order</a>
@@ -348,8 +356,8 @@
             </p>
           </div>
           <div class="footer-col">
-            <p>info@multanelectronics.com</p>
-            <p>+92-300123456</p>
+            <p>info@visionelectronics.com</p>
+            <p>+92-308-0058600</p>
           </div>
           <div class="footer-col">
             <a href="{% url 'all_products' %}">Shop</a>
@@ -367,13 +375,12 @@
 
     <div class="footer-bottom-bar">
       <div class="payment-methods">
-        <i class="fa fa-cc-visa"></i>
-        <i class="fa fa-cc-paypal"></i>
-        <i class="fa fa-cc-mastercard"></i>
-        <i class="fa fa-cc-stripe"></i>
+        <i class="fab fa-cc-visa"></i>
+        <i class="fab fa-cc-mastercard"></i>
+        <i class="fab fa-cc-paypal"></i>
+        <i class="fab fa-cc-stripe"></i>
       </div>
       <div class="f-links">
-        <a href="#">Promo Code</a>
         <a href="#">My Account</a>
         <a href="#">Track Your Order</a>
         <a href="#">About Us</a>
@@ -429,7 +436,15 @@
 
     <!-- ===== FLOATING BUTTONS ===== -->
     <ion-icon name="arrow-up-circle-outline" id="backToTop"></ion-icon>
-    <ion-icon name="logo-whatsapp" class="wp" title="Need Help?"></ion-icon>
+
+    <a
+      href="https://wa.me/923080058600?text=Hello%21%20I%20need%20help%20with%20my%20order"
+      class="whatsapp-float"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <ion-icon name="logo-whatsapp" class="wp" title="Need Help?"></ion-icon>
+    </a>
 
     <!-- ===== SCRIPTS ===== -->
     <script type="module" src="{% static 'js/main.js' %}"></script>

@@ -1,0 +1,121 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block dashboard_title %}Analytics{% endblock %}
+
+{% block dashboard_content %}
+<div class="card">
+    <div class="card-header">
+        <h3>Analytics Dashboard</h3>
+    </div>
+    <div class="card-body">
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <h4>Top Selling Products</h4>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Units Sold</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in top_products %}
+                        <tr>
+                            <td>{{ product.product__name }}</td>
+                            <td>{{ product.total_sold }}</td>
+                            <td>Rs {{ product.total_revenue|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">No sales data available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="analytics-card">
+                <h4>Payment Methods</h4>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Orders</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for method in payment_methods %}
+                        <tr>
+                            <td>{{ method.display_name }}</td>
+                            <td>{{ method.count }}</td>
+                            <td>Rs {{ method.total|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">No payment data available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+.card-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+.card-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+.card-body {
+    padding: 20px;
+}
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+.analytics-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.analytics-card h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+}
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.data-table th,
+.data-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+.data-table th {
+    background: #f9f9f9;
+    font-weight: 600;
+}
+@media (max-width: 768px) {
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

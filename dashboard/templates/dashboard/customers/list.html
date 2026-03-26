@@ -1,0 +1,44 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block dashboard_title %}Customers Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="card">
+    <div class="card-header">
+        <h3>All Customers</h3>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Orders</th>
+                        <th>Total Spent</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td>{{ customer.id }}</td>
+                        <td>{{ customer.username }}</td>
+                        <td>{{ customer.email|default:"-" }}</td>
+                        <td>{{ customer.order_count }}</td>
+                        <td>Rs {{ customer.total_spent|floatformat:0 }}</td>
+                        <td>{{ customer.date_joined|date:"M d, Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No customers found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "orders",
     "wishlist",
     "reviews",
+    "dashboard",
 ]
 
 # ── Custom User Model ─────────────────────────────────────────────────────────
