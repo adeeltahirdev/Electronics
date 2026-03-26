@@ -426,228 +426,27 @@
     <ion-icon name="arrow-up-circle-outline" id="backToTop"></ion-icon>
     <ion-icon name="logo-whatsapp" class="wp" title="Need Help?"></ion-icon>
 
-    <!-- ===== SCRIPTS ===== -->
+      <!-- ===== SCRIPTS ===== -->
     <script type="module" src="{% static 'js/main.js' %}"></script>
 
-    <!-- Global Cart Functions -->
+    <!-- ===== CART FUNCTIONALITY - CONSOLIDATED ===== -->
     <script>
-      // Function to update cart counter
-      function updateCartCounter() {
-        const cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
-        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-
-        // Update desktop cart count
-        const cartCounter = document.getElementById("cartCount");
-        if (cartCounter) {
-          cartCounter.textContent = totalItems;
-          if (totalItems > 0) {
-            cartCounter.style.display = "inline-block";
-          } else {
-            cartCounter.style.display = "none";
-          }
-        }
-
-        // Update mobile cart count
-        const mobileCartCount = document.getElementById("mobileCartCount");
-        if (mobileCartCount) {
-          mobileCartCount.textContent = totalItems;
-          if (totalItems > 0) {
-            mobileCartCount.style.display = "inline-block";
-          } else {
-            mobileCartCount.style.display = "none";
-          }
-        }
-
-        return totalItems;
+      // Helper function to format price
+      function fmtPrice(n) {
+        return "Rs " + Number(n).toLocaleString("en-PK");
       }
 
-      // Function to add to cart (global)
-      function addToCartGlobal(product) {
-        const cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
-        const existingItem = cart.find((item) => item.id === product.id);
-
-        if (existingItem) {
-          existingItem.qty += product.qty || 1;
-        } else {
-          cart.push({
-            id: product.id,
-            name: product.name,
-            price: parseFloat(product.price),
-            img: product.img || "",
-            qty: product.qty || 1,
-          });
-        }
-
-        localStorage.setItem("me_cart", JSON.stringify(cart));
-        updateCartCounter();
-
-        // Show notification
-        const notification = document.createElement("div");
-        notification.textContent = `${product.name} added to cart!`;
-        notification.style.cssText = `
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          background: #4CAF50;
-          color: white;
-          padding: 12px 20px;
-          border-radius: 5px;
-          z-index: 9999;
-          animation: fadeOut 2s ease-out;
-        `;
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 2000);
+      // Helper function to escape HTML
+      function escapeHtml(str) {
+        if (!str) return "";
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
       }
 
-      // Initialize cart counter on page load
-      document.addEventListener("DOMContentLoaded", function () {
-        updateCartCounter();
-      });
-    </script>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // ── Mobile Nav ──────────────────────────────────────────────
-        const mobileToggle = document.querySelector(".mobile-nav-toggle");
-        const mobileClose = document.querySelector(".mobile-close-btn");
-        const mobileNav = document.querySelector(".mobile-nav-container");
-        const mobileOverlay = document.querySelector(".mobile-nav-overlay");
-        const dropdownToggles = document.querySelectorAll(
-          ".mobile-dropdown-toggle",
-        );
-
-        function toggleMobileMenu() {
-          mobileNav.classList.toggle("active");
-          mobileOverlay.classList.toggle("active");
-          document.body.style.overflow = mobileNav.classList.contains("active")
-            ? "hidden"
-            : "";
-        }
-
-        mobileToggle &&
-          mobileToggle.addEventListener("click", toggleMobileMenu);
-        mobileClose && mobileClose.addEventListener("click", toggleMobileMenu);
-        mobileOverlay &&
-          mobileOverlay.addEventListener("click", toggleMobileMenu);
-
-        dropdownToggles.forEach((toggle) => {
-          toggle.addEventListener("click", function () {
-            const dropdown = this.nextElementSibling;
-            dropdown.classList.toggle("active");
-            this.style.transform = dropdown.classList.contains("active")
-              ? "rotate(90deg)"
-              : "rotate(0deg)";
-          });
-        });
-
-        document
-          .querySelectorAll(
-            ".mobile-nav-link, .mobile-account-link, .mobile-cart-link",
-          )
-          .forEach((link) =>
-            link.addEventListener("click", () => toggleMobileMenu()),
-          );
-
-        // ── Mobile Search ────────────────────────────────────────────
-        const mobileSearchBtn = document.getElementById("mobileSearchBtn");
-        const mobileSearchInput = document.getElementById("mobileSearchInput");
-        if (mobileSearchBtn) {
-          mobileSearchBtn.addEventListener("click", function () {
-            const q = mobileSearchInput.value.trim();
-            if (q) {
-              window.location.href =
-                "{% url 'all_products' %}?search=" + encodeURIComponent(q);
-            }
-          });
-          mobileSearchInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") mobileSearchBtn.click();
-          });
-        }
-
-        // ── Header Search ────────────────────────────────────────────
-        const headerSearchBtn = document.getElementById("headerSearchBtn");
-        const headerSearchInput = document.getElementById("headerSearch");
-        if (headerSearchBtn) {
-          headerSearchBtn.addEventListener("click", function () {
-            const q = headerSearchInput.value.trim();
-            if (q) {
-              window.location.href =
-                "{% url 'all_products' %}?search=" + encodeURIComponent(q);
-            }
-          });
-          headerSearchInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") headerSearchBtn.click();
-          });
-        }
-
-        // ── Auth Modal ───────────────────────────────────────────────
-        const authModal = document.getElementById("authModal");
-        const openAuth = document.getElementById("openAuthModal");
-        const mobileAuth = document.getElementById("mobileOpenAuth");
-        const closeAuth = document.getElementById("closeAuth");
-        const authOverlay =
-          authModal && authModal.querySelector(".auth-overlay");
-
-        function openAuthModal() {
-          authModal && authModal.classList.add("active");
-        }
-        function closeAuthModal() {
-          authModal && authModal.classList.remove("active");
-        }
-
-        openAuth &&
-          openAuth.addEventListener("click", (e) => {
-            e.preventDefault();
-            openAuthModal();
-          });
-        mobileAuth &&
-          mobileAuth.addEventListener("click", (e) => {
-            e.preventDefault();
-            openAuthModal();
-          });
-        closeAuth && closeAuth.addEventListener("click", closeAuthModal);
-        authOverlay && authOverlay.addEventListener("click", closeAuthModal);
-
-        // ── Back to Top ──────────────────────────────────────────────
-        const backToTop = document.getElementById("backToTop");
-        if (backToTop) {
-          window.addEventListener("scroll", () => {
-            backToTop.style.display = window.scrollY > 300 ? "block" : "none";
-          });
-          backToTop.addEventListener("click", () =>
-            window.scrollTo({ top: 0, behavior: "smooth" }),
-          );
-        }
-      });
-    </script>
-
-    <style>
-      @keyframes fadeOut {
-        0% {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        10% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        90% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        100% {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-      }
-      .cart-count,
-      .mobile-cart-count {
-        display: inline-block;
-      }
-    </style>
-
-    <!-- Mini Cart Functionality -->
-    <script>
       // Function to update mini cart display
       function updateMiniCart() {
         const cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
@@ -657,36 +456,44 @@
         if (!miniCartItems) return;
 
         if (cart.length === 0) {
-          miniCartItems.innerHTML =
-            '<p class="empty-mini-cart">Your cart is empty.</p>';
+          miniCartItems.innerHTML = '<p class="empty-mini-cart">Your cart is empty.</p>';
           if (miniCartTotal) miniCartTotal.textContent = "Rs 0";
           return;
         }
 
-        // Build mini cart items HTML
+        // Group items by ID to remove duplicates
+        const uniqueItems = {};
+        cart.forEach((item) => {
+          if (uniqueItems[item.id]) {
+            uniqueItems[item.id].qty += item.qty;
+          } else {
+            uniqueItems[item.id] = { ...item };
+          }
+        });
+
+        const groupedCart = Object.values(uniqueItems);
         let itemsHtml = "";
         let total = 0;
 
-        cart.forEach((item) => {
+        groupedCart.forEach((item) => {
           const itemTotal = item.price * item.qty;
           total += itemTotal;
           itemsHtml += `
-        <div class="mini-cart-item" data-id="${item.id}">
-          <img src="${item.img || "/static/img/placeholder.webp"}" alt="${escapeHtml(item.name)}" class="mini-cart-item-img">
-          <div class="mini-cart-item-details">
-            <div class="mini-cart-item-name">${escapeHtml(item.name)}</div>
-            <div class="mini-cart-item-price">${fmtPrice(item.price)} × ${item.qty}</div>
-            <div class="mini-cart-item-subtotal">${fmtPrice(itemTotal)}</div>
-          </div>
-          <button class="mini-cart-remove" data-id="${item.id}">×</button>
-        </div>
-      `;
+            <div class="mini-cart-item" data-id="${item.id}">
+              <img src="${item.img || '/static/img/placeholder.webp'}" alt="${escapeHtml(item.name)}" class="mini-cart-item-img">
+              <div class="mini-cart-item-details">
+                <div class="mini-cart-item-name">${escapeHtml(item.name)}</div>
+                <div class="mini-cart-item-price">${fmtPrice(item.price)} × ${item.qty}</div>
+              </div>
+              <button class="mini-cart-remove" data-id="${item.id}">×</button>
+            </div>
+          `;
         });
 
         miniCartItems.innerHTML = itemsHtml;
         if (miniCartTotal) miniCartTotal.textContent = fmtPrice(total);
 
-        // Add remove functionality to remove buttons
+        // Add remove functionality
         document.querySelectorAll(".mini-cart-remove").forEach((btn) => {
           btn.addEventListener("click", function (e) {
             e.preventDefault();
@@ -704,136 +511,31 @@
         localStorage.setItem("me_cart", JSON.stringify(cart));
         updateCartCounter();
         updateMiniCart();
-
-        // Also update cart page if it's open
+        
+        // Update cart page if open
         if (typeof renderCart === "function") {
           renderCart();
         }
-
+        
         showNotification("Item removed from cart");
       }
 
-      // Helper function to format price
-      function fmtPrice(n) {
-        return "Rs " + Number(n).toLocaleString("en-PK");
-      }
-
-      // Helper function to escape HTML
-      function escapeHtml(str) {
-        if (!str) return "";
-        return str
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#39;");
-      }
-
-      // Override the addToCartGlobal function to also update mini cart
-      const originalAddToCartGlobal = window.addToCartGlobal;
-      window.addToCartGlobal = function (product) {
-        if (originalAddToCartGlobal) {
-          originalAddToCartGlobal(product);
-        } else {
-          let cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
-          const existingItem = cart.find((item) => item.id === product.id);
-          if (existingItem) {
-            existingItem.qty += product.qty || 1;
-          } else {
-            cart.push({
-              id: product.id,
-              name: product.name,
-              price: parseFloat(product.price),
-              img: product.img || "",
-              qty: product.qty || 1,
-            });
-          }
-          localStorage.setItem("me_cart", JSON.stringify(cart));
-          updateCartCounter();
-        }
-        updateMiniCart();
-        showNotification(`${product.name} added to cart!`);
-      };
-
-      // Override the updateCartCounter to also update mini cart
-      const originalUpdateCartCounter = window.updateCartCounter;
-      window.updateCartCounter = function () {
-        if (originalUpdateCartCounter) {
-          originalUpdateCartCounter();
-        } else {
-          const cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
-          const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-          const cartCounter = document.getElementById("cartCount");
-          if (cartCounter) {
-            cartCounter.textContent = totalItems;
-            cartCounter.style.display =
-              totalItems > 0 ? "inline-block" : "none";
-          }
-        }
-        updateMiniCart();
-        return totalItems;
-      };
-
-      // Show notification function if not exists
-      if (typeof window.showNotification === "undefined") {
-        window.showNotification = function (message) {
-          const notification = document.createElement("div");
-          notification.textContent = message;
-          notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #4CAF50;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 5px;
-        z-index: 9999;
-        animation: fadeOut 2s ease-out;
-        z-index: 10000;
-      `;
-          document.body.appendChild(notification);
-          setTimeout(() => {
-            notification.style.opacity = "0";
-            setTimeout(() => notification.remove(), 300);
-          }, 2000);
-        };
-      }
-
-      // Initialize mini cart on page load
-      document.addEventListener("DOMContentLoaded", function () {
-        // Initialize cart counter and mini cart
-        if (typeof updateCartCounter === "function") {
-          updateCartCounter();
-        } else {
-          updateCartCounter();
-        }
-
-        // Add click handler for cart icon to show mini cart
-        const cartIcon = document.querySelector(".cart-icon");
-        const miniCart = document.getElementById("miniCart");
-
-        if (cartIcon && miniCart) {
-          cartIcon.addEventListener("click", function (e) {
-            e.stopPropagation();
-            miniCart.classList.toggle("active");
-            updateMiniCart();
-          });
-
-          // Close mini cart when clicking outside
-          document.addEventListener("click", function (e) {
-            if (!cartIcon.contains(e.target) && !miniCart.contains(e.target)) {
-              miniCart.classList.remove("active");
-            }
-          });
-        }
-      });
-    </script>
-
-    <script>
-      // Global cart functions
+      // Update cart counter function
       function updateCartCounter() {
-        const cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
-        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+        let cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
+        
+        // Group items to count correctly
+        const uniqueItems = {};
+        cart.forEach((item) => {
+          if (uniqueItems[item.id]) {
+            uniqueItems[item.id].qty += item.qty;
+          } else {
+            uniqueItems[item.id] = { ...item };
+          }
+        });
+        const cleanCart = Object.values(uniqueItems);
+        const totalItems = cleanCart.reduce((sum, item) => sum + item.qty, 0);
+
         const cartCounter = document.getElementById("cartCount");
         const mobileCartCount = document.getElementById("mobileCartCount");
 
@@ -844,19 +546,19 @@
 
         if (mobileCartCount) {
           mobileCartCount.textContent = totalItems;
-          mobileCartCount.style.display =
-            totalItems > 0 ? "inline-block" : "none";
+          mobileCartCount.style.display = totalItems > 0 ? "inline-block" : "none";
         }
 
         return totalItems;
       }
 
-      function addToCartGlobal(product) {
+      // Main add to cart function
+      window.addToCartGlobal = function(product) {
         let cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
         const existingItem = cart.find((item) => item.id === product.id);
 
         if (existingItem) {
-          existingItem.qty += product.qty || 1;
+          existingItem.qty += (product.qty || 1);
         } else {
           cart.push({
             id: product.id,
@@ -868,29 +570,38 @@
         }
 
         localStorage.setItem("me_cart", JSON.stringify(cart));
+        
+        // Update all displays immediately
         updateCartCounter();
-
-        // Show notification
+        updateMiniCart();
         showNotification(`${product.name} added to cart!`);
-      }
+      };
 
+      // Show notification function
       function showNotification(message) {
+        const existing = document.querySelector(".cart-notification");
+        if (existing) existing.remove();
+
         const notification = document.createElement("div");
+        notification.className = "cart-notification";
         notification.textContent = message;
         notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #4CAF50;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 5px;
-      z-index: 10000;
-      animation: fadeOut 2s ease-out;
-    `;
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #4CAF50;
+          color: white;
+          padding: 12px 20px;
+          border-radius: 5px;
+          z-index: 10000;
+          font-size: 14px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        `;
         document.body.appendChild(notification);
+        
         setTimeout(() => {
           notification.style.opacity = "0";
+          notification.style.transition = "opacity 0.3s";
           setTimeout(() => notification.remove(), 300);
         }, 2000);
       }
@@ -898,27 +609,152 @@
       // Initialize on page load
       document.addEventListener("DOMContentLoaded", function () {
         updateCartCounter();
+        updateMiniCart();
+
+        // Cart icon click handler
+        const cartIcon = document.querySelector(".cart-icon");
+        const miniCart = document.getElementById("miniCart");
+
+        if (cartIcon && miniCart) {
+          cartIcon.addEventListener("click", function (e) {
+            e.stopPropagation();
+            miniCart.classList.toggle("active");
+            updateMiniCart();
+          });
+
+          document.addEventListener("click", function (e) {
+            if (miniCart && cartIcon && !cartIcon.contains(e.target) && !miniCart.contains(e.target)) {
+              miniCart.classList.remove("active");
+            }
+          });
+        }
+        
+        // Listen for cart changes from other tabs
+        window.addEventListener("storage", function (e) {
+          if (e.key === "me_cart") {
+            updateCartCounter();
+            updateMiniCart();
+          }
+        });
       });
     </script>
 
     <style>
       @keyframes fadeOut {
-        0% {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        10% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        90% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        100% {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
+        0% { opacity: 0; transform: translateY(-20px); }
+        10% { opacity: 1; transform: translateY(0); }
+        90% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-20px); }
+      }
+      .cart-count, .mobile-cart-count {
+        display: inline-block;
+      }
+      .cart-notification {
+        animation: fadeOut 2s ease-out;
+      }
+      .mini-cart {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        width: 320px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        padding: 15px;
+        z-index: 1000;
+        display: none;
+      }
+      .mini-cart.active {
+        display: block;
+      }
+      .mini-cart h4 {
+        margin: 0 0 15px 0;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .mini-cart-items {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .mini-cart-item {
+        display: flex;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .mini-cart-item-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+      .mini-cart-item-details {
+        flex: 1;
+      }
+      .mini-cart-item-name {
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 5px;
+      }
+      .mini-cart-item-price {
+        font-size: 12px;
+        color: #666;
+      }
+      .mini-cart-remove {
+        background: none;
+        border: none;
+        color: #ff4444;
+        cursor: pointer;
+        font-size: 18px;
+        padding: 0 5px;
+        opacity: 0.6;
+      }
+      .mini-cart-remove:hover {
+        opacity: 1;
+      }
+      .empty-mini-cart {
+        text-align: center;
+        color: #999;
+        padding: 20px;
+      }
+      .mini-cart-footer {
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+      }
+      .mini-total {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .cnt {
+        display: flex;
+        gap: 10px;
+      }
+      .cnt button {
+        flex: 1;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .view-cart-btn {
+        background: #333;
+        color: white;
+      }
+      .check-out-btn {
+        background: #ff6600;
+        color: white;
+      }
+      .cart-icon {
+        position: relative;
+        cursor: pointer;
       }
     </style>
 
@@ -932,5 +768,6 @@
       nomodule
       src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
     ></script>
+
   </body>
 </html>

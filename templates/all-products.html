@@ -40,50 +40,8 @@
 
 {% block extra_scripts %}
 <script>
-  // Function to update cart counter
-  function updateCartCounter() {
-    const cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
-    const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-    const cartCounter = document.getElementById("cartCount");
-    if (cartCounter) {
-      cartCounter.textContent = totalItems;
-      // Show/hide counter based on value
-      if (totalItems > 0) {
-        cartCounter.style.display = "inline-block";
-      } else {
-        cartCounter.style.display = "none";
-      }
-    }
-    return totalItems;
-  }
-
-  // Show temporary notification
-  function showNotification(message) {
-    const notification = document.createElement('div');
-    notification.textContent = message;
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #4CAF50;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 5px;
-      z-index: 9999;
-      animation: fadeOut 2s ease-out;
-    `;
-    document.body.appendChild(notification);
-    setTimeout(() => {
-      notification.style.opacity = '0';
-      setTimeout(() => notification.remove(), 300);
-    }, 2000);
-  }
-
   // ── All Products: sorting, filtering, pagination ──────────────────────────
   document.addEventListener("DOMContentLoaded", function () {
-    // Update cart counter on page load
-    updateCartCounter();
-    
     // Check if PRODUCTS_DATA exists
     if (typeof PRODUCTS_DATA === 'undefined') {
       console.error("PRODUCTS_DATA is not defined! Check if products_json is being passed from Django.");
@@ -181,26 +139,34 @@
             id: parseInt(this.dataset.id),
             name: this.dataset.name,
             price: parseFloat(this.dataset.price),
-            img: this.dataset.img
+            img: this.dataset.img,
+            qty: 1
           };
           
           console.log("Add to cart clicked:", product);
           
-          // Store in localStorage directly
-          let cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
-          const existingItem = cart.find(item => item.id === product.id);
-          if (existingItem) {
-            existingItem.qty += 1;
+          // Use the global addToCartGlobal function from base.html
+          if (typeof window.addToCartGlobal === 'function') {
+            window.addToCartGlobal(product);
           } else {
-            cart.push({...product, qty: 1});
+            // Fallback if global function doesn't exist
+            let cart = JSON.parse(localStorage.getItem("me_cart") || "[]");
+            const existingItem = cart.find(item => item.id === product.id);
+            if (existingItem) {
+              existingItem.qty += 1;
+            } else {
+              cart.push({...product, qty: 1});
+            }
+            localStorage.setItem("me_cart", JSON.stringify(cart));
+            
+            // Update cart counter and mini cart
+            if (typeof updateCartCounter === 'function') {
+              updateCartCounter();
+            }
+            if (typeof updateMiniCart === 'function') {
+              updateMiniCart();
+            }
           }
-          localStorage.setItem("me_cart", JSON.stringify(cart));
-          
-          // Update cart counter immediately
-          updateCartCounter();
-          
-          // Show notification
-          showNotification(`${product.name} added to cart!`);
         });
       });
     }
